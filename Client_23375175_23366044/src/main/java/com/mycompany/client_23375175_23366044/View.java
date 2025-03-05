@@ -35,13 +35,13 @@ import javafx.stage.Stage;
 
 
 public class View extends Application {
-    private final LecturerManager lectureManager;
+    private final LecturerManager lecturerManager;
     private TextArea responseArea;
     private ListView<String> moduleList;
     private ComboBox<String> moduleSelect;
 
     public View() {
-        this.lectureManager = new LecturerManager();
+        this.lecturerManager = new LecturerManager();
     }
 
     @Override
@@ -98,7 +98,7 @@ public class View extends Application {
 
     private void handleAddModule(TextField moduleInput) {
         String module = moduleInput.getText();
-        if (lectureManager.addModule(module)) {
+        if (lecturerManager.addModule(module)) {
             updateModuleLists();
             moduleInput.clear();
         } else {
@@ -107,7 +107,7 @@ public class View extends Application {
     }
 
     private void updateModuleLists() {
-        List<String> modules = lectureManager.getModules();
+        List<String> modules = lecturerManager.getModules();
         moduleList.setItems(FXCollections.observableArrayList(modules));
         moduleSelect.setItems(FXCollections.observableArrayList(modules));
     }
@@ -125,7 +125,7 @@ public class View extends Application {
 
     private void setupLectureControls(GridPane grid) {
         ComboBox<String> actionSelect = new ComboBox<>(
-                FXCollections.observableArrayList(UIConstants.ACTIONS)
+                FXCollections.observableArrayList(UIConstants.LECTURER_ACTIONS)
         );
         moduleSelect = new ComboBox<>();
         DatePicker datePicker = new DatePicker();
@@ -179,15 +179,17 @@ public class View extends Application {
         }
     }
 
-    private void handleAddLecture(String module, LocalDate date, LocalTime time, String room) {
-        if (lectureManager.addLecturer(module, date, time, room)) {
-            updateResponse("Lecture added successfully:\n" +
-                    new Lecturer(module, date, time, room));
-        }
+ private void handleAddLecture(String module, LocalDate date, LocalTime time, String room) {
+    if (lecturerManager.addLecture(module, date, time, room)) {
+        updateResponse("Lecture added successfully:\n" +
+                new Lecture(module, date, time, room));
+    } else {
+        updateResponse("Failed to add lecture. Check for conflicts or module existence.");
     }
+}
 
     private void handleRemoveLecture(String module, LocalDate date, LocalTime time, String room) {
-        if (lectureManager.removeLecture(module, date, time, room)) {
+        if (lecturerManager.removeLecture(module, date, time, room)) {
             updateResponse("Lecture removed successfully");
         } else {
             updateResponse("Lecture not found");
@@ -195,7 +197,7 @@ public class View extends Application {
     }
 
     private void displaySchedule() {
-        List<Lecturer> lectures = lectureManager.getAllLectures();
+        List<Lecture> lectures = lecturerManager.getAllLectures();
         if (lectures.isEmpty()) {
             updateResponse("No lectures scheduled.");
             return;
@@ -227,6 +229,11 @@ public class View extends Application {
         alert.showAndWait();
     }
     
+    
+    
+    public static void main(String[] args) {
+        launch(args);
+    }
     
 }
 

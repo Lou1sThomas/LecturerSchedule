@@ -1,7 +1,13 @@
+com\mycompany\client_23375175_23366044\ClientServer.class
+com\mycompany\client_23375175_23366044\MainMenu.class
+com\mycompany\client_23375175_23366044\LectureSchedulerGUI.class
+com\mycompany\client_23375175_23366044\LectureDisplay.class
+com\mycompany\client_23375175_23366044\Lecturer.class
+com\mycompany\client_23375175_23366044\ClientGUI_23375175_23366044.class
 com\mycompany\client_23375175_23366044\SystemInfo.class
+com\mycompany\client_23375175_23366044\TimetableViewGUI.class
 com\mycompany\client_23375175_23366044\UIConstants.class
 module-info.class
 com\mycompany\client_23375175_23366044\LecturerManager.class
+com\mycompany\client_23375175_23366044\Lecture.class
 com\mycompany\client_23375175_23366044\View.class
-com\mycompany\client_23375175_23366044\Lecturer.class
-com\mycompany\client_23375175_23366044\ClientGUI_23375175_23366044.class
