@@ -17,7 +17,7 @@ public class Server_23375175_23366044{
     private static int clientConnections = 0;
     
     public static void main(String[] args) {
-        System.out.println("Opening Port.../n");
+        System.out.println("Opening Port...\n");
         try{
             servSock = new ServerSocket(PORT);
         }
@@ -39,16 +39,33 @@ public class Server_23375175_23366044{
             
             BufferedReader in = new BufferedReader(new InputStreamReader(link.getInputStream()));
             PrintWriter out = new PrintWriter(link.getOutputStream(),true);
-            String message = in.readLine();
-            System.out.println("Message recieved from client: " + clientConnections + " " + message);
-            out.println("Echo message " + message);
+            System.out.println("Message recieved from client: " + clientConnections + "connected");
+            
+            boolean running = true;
+            while (running) {
+                String message = in.readLine();
+                
+                if(message == null) {
+                    System.out.println("Client " + clientConnections + "disconnected");
+                    break;
+                }
+                System.out.println("Message recieved from client " + clientConnections + ": " + message);
+                
+                if(message.equals("QUIT")) {
+                    out.print("Closing Lecture Scheduler");
+                    System.out.println("Client " + clientConnections + "closed connection");
+                    running = false;
+                } else {
+                    clientMessageHandler(message, out);
+                }
+            }
             
         } catch (IOException e) {
             e.printStackTrace();
         }
         finally {
             try{
-                System.out.println("/n Closing Connection");
+                System.out.println("\n Closing Connection");
                 link.close();
                 
             } catch(IOException e) {
@@ -58,4 +75,25 @@ public class Server_23375175_23366044{
         }
     }
     
+    private static void clientMessageHandler(String message, PrintWriter out) {
+        message.toUpperCase().trim(); //Failsafe, incase message to server somehow is sent in lowercase or with spaces
+        
+        switch (message) {
+            case "OPEN_SHOW_LECTURE":
+                out.println("SHOW_LECTURE_MENU");
+                break;
+                
+            case "OPEN_ADD_LECTURE":
+                out.println("ADD_LECTURE_MENU");
+                break;
+            
+            case "OPEN_REMOVE_LECTURE":
+                out.println("REMOVE_LECTURE_MENU");
+                break;
+                
+            default:
+                out.println("Unknown Command: " + message);
+                break;  
+        }
+    }
 }
