@@ -28,7 +28,6 @@ public class LectureSchedulerGUI extends Application {
     private TextArea responseArea;
     private ListView<String> moduleList;
     private ComboBox<String> moduleSelect;
-    private TextField lecturerNameField;
     private TextField moduleInput;
     private Stage primaryStage;
 
@@ -108,52 +107,16 @@ public class LectureSchedulerGUI extends Application {
         }
     }
 
-
-    private void handleLecturerSubmission(String action, String module, String lecturerName) {
-        if (action == null) {
-            showAlert("Error", "Please select an action.");
-            return;
-        }
-
-        if (!validateLecturerInputs(action, module, lecturerName)) {
-            return;
-        }
-
-        switch (action) {
-            case "Add Lecturer":
-                if (lectureManager.addLecturer(lecturerName, module)) {
-                    updateResponse("Lecturer added successfully");
-                    // Clear the input field after successful addition
-                    lecturerNameField.clear();
-                } else {
-                    showAlert("Error", "Cannot add lecturer.");
-                }
-                break;
-            case "Remove Lecturer":
-                if (lectureManager.removeLecturer(lecturerName, module)) {
-                    updateResponse("Lecturer removed successfully");
-                } else {
-                    updateResponse("Lecturer not found");
-                }
-                break;
-            case "Display Lecturers":
-                getAllLecturers();
-                break;
-        }
-    }
-
     private GridPane createLectureSection() {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(10));
 
-        // Lecture Action Controls
-        ComboBox<String> actionSelect = new ComboBox<>(
-                FXCollections.observableArrayList(UIConstants.LECTURE_ACTIONS)
-        );
-        actionSelect.setPromptText("Select Action");
-
+        // Add Label for lecture section
+        Label sectionLabel = new Label("Add Lecture");
+        sectionLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+        
         moduleSelect = new ComboBox<>();
         moduleSelect.setPromptText("Select Module");
 
@@ -170,50 +133,32 @@ public class LectureSchedulerGUI extends Application {
         );
         roomSelect.setPromptText("Select Room");
 
-        Button submitButton = new Button("Submit Request");
-        submitButton.setOnAction(e -> handleLectureSubmission(
-                actionSelect.getValue(),
+        Button addLectureButton = new Button("Add Lecture");
+        addLectureButton.setOnAction(e -> handleAddLectureSubmission(
                 moduleSelect.getValue(),
                 datePicker.getValue(),
                 timeSelect.getValue(),
                 roomSelect.getValue()
         ));
 
-        grid.add(new Label("Lecture Management"), 0, 0, 2, 1);
-        grid.addRow(1, new Label("Select Action:"), actionSelect);
-        grid.addRow(2, new Label("Select Module:"), moduleSelect);
-        grid.addRow(3, new Label("Select Date:"), datePicker);
-        grid.addRow(4, new Label("Select Time:"), timeSelect);
-        grid.addRow(5, new Label("Select Room:"), roomSelect);
-        grid.add(submitButton, 1, 6);
+        grid.add(sectionLabel, 0, 0, 2, 1);
+        grid.addRow(1, new Label("Select Module:"), moduleSelect);
+        grid.addRow(2, new Label("Select Date:"), datePicker);
+        grid.addRow(3, new Label("Select Time:"), timeSelect);
+        grid.addRow(4, new Label("Select Room:"), roomSelect);
+        grid.add(addLectureButton, 1, 5);
 
         return grid;
     }
 
-    private void handleLectureSubmission(String action, String module, LocalDate date,
+    private void handleAddLectureSubmission(String module, LocalDate date,
                                          String timeStr, String room) {
-        if (action == null) {
-            showAlert("Error", "Please select an action.");
-            return;
-        }
-
-        if (!validateLectureInputs(action, module, date, timeStr, room)) {
+        if (!validateLectureInputs(module, date, timeStr, room)) {
             return;
         }
 
         LocalTime time = LocalTime.parse(timeStr);
-
-        switch (action) {
-            case "Add Lecture":
-                handleAddLecture(module, date, time, room);
-                break;
-            case "Remove Lecture":
-                handleRemoveLecture(module, date, time, room);
-                break;
-            case "Display Lectures":
-                displayLectures();
-                break;
-        }
+        handleAddLecture(module, date, time, room);
     }
 
     private void handleAddLecture(String module, LocalDate date, LocalTime time, String room) {
@@ -221,58 +166,13 @@ public class LectureSchedulerGUI extends Application {
             updateResponse("Lecture added successfully:\n" +
                     new Lecture(module, date, time, room));
         } else {
-            showAlert("Error", "Cannot add lecture.");
+            showAlert("Error", "Cannot add lecture. Check if there's a conflict or if the module exists.");
         }
     }
 
-    private void handleRemoveLecture(String module, LocalDate date, LocalTime time, String room) {
-        if (lectureManager.removeLecture(module, date, time, room)) {
-            updateResponse("Lecture removed successfully");
-        } else {
-            updateResponse("Lecture not found");
-        }
-    }
-
-    private void getAllLecturers() {
-        List<Lecturer> lecturerList = lectureManager.getAllLecturers();
-        if (lecturerList.isEmpty()) {
-            updateResponse("No lecturers found.");
-            return;
-        }
-
-        StringBuilder lecturerBuilder = new StringBuilder("Current Lecturers:\n\n");
-        for (Lecturer lecturer : lecturerList) {
-            lecturerBuilder.append(lecturer.toString()).append("\n");
-        }
-        updateResponse(lecturerBuilder.toString());
-    }
-
-    private void displayLectures() {
-        List<Lecture> lectures = lectureManager.getAllLectures();
-        if (lectures.isEmpty()) {
-            updateResponse("No lectures scheduled.");
-            return;
-        }
-
-        StringBuilder lectureList = new StringBuilder("Current Lectures:\n\n");
-        lectures.forEach(lecture ->
-                lectureList.append(lecture.toString()).append("\n")
-        );
-        updateResponse(lectureList.toString());
-    }
-
-    private boolean validateLectureInputs(String action, String module,
-                                          LocalDate date, String time, String room) {
+    private boolean validateLectureInputs(String module, LocalDate date, String time, String room) {
         if (module == null || date == null || time == null || room == null) {
             showAlert("Error", "Please fill in all lecture fields");
-            return false;
-        }
-        return true;
-    }
-
-    private boolean validateLecturerInputs(String action, String module, String lecturerName) {
-        if (module == null || lecturerName.trim().isEmpty()) {
-            showAlert("Error", "Please fill in all lecturer fields");
             return false;
         }
         return true;

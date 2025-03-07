@@ -9,17 +9,19 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 public class MainMenu extends Application {
+    private Stage primaryStage;
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Lecture Scheduler - Main Menu");
+        this.primaryStage = primaryStage;
+        primaryStage.setTitle("Timetable Manager");
 
         // Create main layout
         VBox mainLayout = new VBox(20);
@@ -28,53 +30,73 @@ public class MainMenu extends Application {
         mainLayout.setStyle("-fx-background-color: #f0f0f0;");
 
         // Title
-        Label titleLabel = new Label("Lecture Scheduler");
+        Label titleLabel = new Label("Timetable Manager");
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 30));
         titleLabel.setStyle("-fx-text-fill: #2e5b7d;");
 
         // Buttons
-        Button viewScheduleButton = createStyledButton("View Timetable");
-        Button manageLecturersButton = createStyledButton("Manage Lecturers");
+        Button schedulerButton = createStyledButton("Lecture Scheduler");
+        schedulerButton.setOnAction(e -> openLectureScheduler());
 
-        // Button actions
-        viewScheduleButton.setOnAction(e -> {
-            TimetableViewGUI timetableView = new TimetableViewGUI();
-            try {
-                timetableView.start(new Stage());
-                primaryStage.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        });
+        Button removeLecturerButton = createStyledButton("Remove Lecturer");
+        removeLecturerButton.setOnAction(e -> openRemoveLecturer());
 
-        manageLecturersButton.setOnAction(e -> {
-            LectureSchedulerGUI lecturerManager = new LectureSchedulerGUI();
-            try {
-                lecturerManager.start(new Stage());
-                primaryStage.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        });
+        Button timetableButton = createStyledButton("View Timetable");
+        timetableButton.setOnAction(e -> openTimetableView());
+
+        Button exitButton = createStyledButton("Exit");
+        exitButton.setOnAction(e -> primaryStage.close());
 
         // Add components to layout
         mainLayout.getChildren().addAll(
                 titleLabel,
-                viewScheduleButton,
-                manageLecturersButton
+                schedulerButton,
+                removeLecturerButton,
+                timetableButton,
+                exitButton
         );
 
         // Create scene
-        Scene scene = new Scene(mainLayout, 400, 300);
+        Scene scene = new Scene(mainLayout, 500, 400);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private void openLectureScheduler() {
+        try {
+            LectureSchedulerGUI scheduler = new LectureSchedulerGUI();
+            scheduler.start(new Stage());
+            primaryStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openRemoveLecturer() {
+        try {
+            RemoveLecturerGUI removeLecturer = new RemoveLecturerGUI();
+            removeLecturer.start(new Stage());
+            primaryStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void openTimetableView() {
+        try {
+            TimetableViewGUI timetable = new TimetableViewGUI();
+            timetable.start(new Stage());
+            primaryStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // Helper method to create styled buttons
     private Button createStyledButton(String text) {
         Button button = new Button(text);
 
-        // Define the default style as a regular string
+        // Define default and hover styles
         String defaultStyle = "-fx-background-color: #2E7D32;"
                 + "-fx-text-fill: white;"
                 + "-fx-font-size: 16px;"
@@ -82,7 +104,6 @@ public class MainMenu extends Application {
                 + "-fx-background-radius: 5;"
                 + "-fx-cursor: hand;";
 
-        // Define the hover style
         String hoverStyle = "-fx-background-color: #1B5E20;"
                 + "-fx-text-fill: white;"
                 + "-fx-font-size: 16px;"
@@ -90,10 +111,8 @@ public class MainMenu extends Application {
                 + "-fx-background-radius: 5;"
                 + "-fx-cursor: hand;";
 
-        // Set the default style
+        // Set default style and hover effect
         button.setStyle(defaultStyle);
-
-        // Hover effects
         button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
         button.setOnMouseExited(e -> button.setStyle(defaultStyle));
 
