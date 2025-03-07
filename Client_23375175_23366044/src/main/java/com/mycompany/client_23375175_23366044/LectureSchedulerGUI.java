@@ -8,6 +8,7 @@ package com.mycompany.client_23375175_23366044;
  *
  * @author louis
  */
+
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -32,7 +33,8 @@ public class LectureSchedulerGUI extends Application {
     private Stage primaryStage;
 
     public LectureSchedulerGUI() {
-        this.lectureManager = new LecturerManager();
+        // Use the singleton to get the shared instance
+        this.lectureManager = LecturerManagerSingleton.getInstance();
     }
 
     @Override
@@ -66,8 +68,6 @@ public class LectureSchedulerGUI extends Application {
         mainLayout.getChildren().addAll(
                 new Label("Course: LM051-2026"),
                 createModuleSection(),
-                new Separator(),
-                createLecturerSection(),
                 new Separator(),
                 createLectureSection(),
                 new Separator(),
@@ -108,17 +108,6 @@ public class LectureSchedulerGUI extends Application {
         }
     }
 
-    private GridPane createLecturerSection() {
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(10));
-
-        TextField lectureNameFiled = new TextField();
-        lectureNameFiled.setPromptText("Enter lecture name");
-
-        return grid;
-    }
 
     private void handleLecturerSubmission(String action, String module, String lecturerName) {
         if (action == null) {
@@ -134,6 +123,8 @@ public class LectureSchedulerGUI extends Application {
             case "Add Lecturer":
                 if (lectureManager.addLecturer(lecturerName, module)) {
                     updateResponse("Lecturer added successfully");
+                    // Clear the input field after successful addition
+                    lecturerNameField.clear();
                 } else {
                     showAlert("Error", "Cannot add lecturer.");
                 }
@@ -186,8 +177,6 @@ public class LectureSchedulerGUI extends Application {
                 datePicker.getValue(),
                 timeSelect.getValue(),
                 roomSelect.getValue()
-
-
         ));
 
         grid.add(new Label("Lecture Management"), 0, 0, 2, 1);

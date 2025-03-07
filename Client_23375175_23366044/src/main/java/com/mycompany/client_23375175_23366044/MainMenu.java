@@ -4,10 +4,6 @@
  */
 package com.mycompany.client_23375175_23366044;
 
-/**
- *
- * @author louis
- */
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -76,34 +72,33 @@ public class MainMenu extends Application {
 
     // Helper method to create styled buttons
     private Button createStyledButton(String text) {
-    Button button = new Button(text);
+        Button button = new Button(text);
 
-    // Define the default style as a regular string
-    String defaultStyle = "-fx-background-color: #2E7D32;"
-                        + "-fx-text-fill: white;"
-                        + "-fx-font-size: 16px;"
-                        + "-fx-padding: 10 20;"
-                        + "-fx-background-radius: 5;"
-                        + "-fx-cursor: hand;";
+        // Define the default style as a regular string
+        String defaultStyle = "-fx-background-color: #2E7D32;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 16px;"
+                + "-fx-padding: 10 20;"
+                + "-fx-background-radius: 5;"
+                + "-fx-cursor: hand;";
 
-    // Define the hover style
-    String hoverStyle = "-fx-background-color: #1B5E20;"
-                      + "-fx-text-fill: white;"
-                      + "-fx-font-size: 16px;"
-                      + "-fx-padding: 10 20;"
-                      + "-fx-background-radius: 5;"
-                      + "-fx-cursor: hand;";
+        // Define the hover style
+        String hoverStyle = "-fx-background-color: #1B5E20;"
+                + "-fx-text-fill: white;"
+                + "-fx-font-size: 16px;"
+                + "-fx-padding: 10 20;"
+                + "-fx-background-radius: 5;"
+                + "-fx-cursor: hand;";
 
-    // Set the default style
-    button.setStyle(defaultStyle);
+        // Set the default style
+        button.setStyle(defaultStyle);
 
-    // Hover effects
-    button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
-    button.setOnMouseExited(e -> button.setStyle(defaultStyle));
+        // Hover effects
+        button.setOnMouseEntered(e -> button.setStyle(hoverStyle));
+        button.setOnMouseExited(e -> button.setStyle(defaultStyle));
 
-    return button;
-}
-
+        return button;
+    }
 
     public static void main(String[] args) {
         launch(args);
