@@ -32,10 +32,10 @@ public class MainMenu extends Application {
         // Title
         Label titleLabel = new Label("Timetable Manager");
         titleLabel.setFont(Font.font("Arial", FontWeight.BOLD, 30));
-        titleLabel.setStyle("-fx-text-fill: #2e5b7d;");
+        titleLabel.setStyle("-fx-text-fill: #2E7D32;");
 
         // Buttons
-        Button schedulerButton = createStyledButton("Lecture Scheduler");
+        Button schedulerButton = createStyledButton("Add Lecturer");
         schedulerButton.setOnAction(e -> openLectureScheduler());
 
         Button removeLecturerButton = createStyledButton("Remove Lecturer");

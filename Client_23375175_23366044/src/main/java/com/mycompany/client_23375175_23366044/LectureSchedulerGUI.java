@@ -23,12 +23,19 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ *
+ * @author louis
+ */
+
+
 public class LectureSchedulerGUI extends Application {
     private final LecturerManager lectureManager;
     private TextArea responseArea;
     private ListView<String> moduleList;
     private ComboBox<String> moduleSelect;
     private TextField moduleInput;
+    private TextField lecturerNameField;
     private Stage primaryStage;
 
     public LectureSchedulerGUI() {
@@ -120,6 +127,10 @@ public class LectureSchedulerGUI extends Application {
         moduleSelect = new ComboBox<>();
         moduleSelect.setPromptText("Select Module");
 
+        // Add lecturer name field
+        lecturerNameField = new TextField();
+        lecturerNameField.setPromptText("Enter lecturer name");
+
         DatePicker datePicker = new DatePicker();
         datePicker.setPromptText("Select Date");
 
@@ -136,6 +147,7 @@ public class LectureSchedulerGUI extends Application {
         Button addLectureButton = new Button("Add Lecture");
         addLectureButton.setOnAction(e -> handleAddLectureSubmission(
                 moduleSelect.getValue(),
+                lecturerNameField.getText(),
                 datePicker.getValue(),
                 timeSelect.getValue(),
                 roomSelect.getValue()
@@ -143,38 +155,57 @@ public class LectureSchedulerGUI extends Application {
 
         grid.add(sectionLabel, 0, 0, 2, 1);
         grid.addRow(1, new Label("Select Module:"), moduleSelect);
-        grid.addRow(2, new Label("Select Date:"), datePicker);
-        grid.addRow(3, new Label("Select Time:"), timeSelect);
-        grid.addRow(4, new Label("Select Room:"), roomSelect);
-        grid.add(addLectureButton, 1, 5);
+        grid.addRow(2, new Label("Lecturer Name:"), lecturerNameField);
+        grid.addRow(3, new Label("Select Date:"), datePicker);
+        grid.addRow(4, new Label("Select Time:"), timeSelect);
+        grid.addRow(5, new Label("Select Room:"), roomSelect);
+        grid.add(addLectureButton, 1, 6);
 
         return grid;
     }
 
-    private void handleAddLectureSubmission(String module, LocalDate date,
+    private void handleAddLectureSubmission(String module, String lecturerName, LocalDate date,
                                          String timeStr, String room) {
-        if (!validateLectureInputs(module, date, timeStr, room)) {
+        if (!validateLectureInputs(module, lecturerName, date, timeStr, room)) {
             return;
         }
 
         LocalTime time = LocalTime.parse(timeStr);
-        handleAddLecture(module, date, time, room);
+        
+        // First add lecturer if it doesn't exist
+        if (!lecturerNameField.getText().trim().isEmpty()) {
+            lectureManager.addLecturer(lecturerName, module);
+        }
+        
+        // Then add lecture
+        handleAddLecture(module, date, time, room, lecturerName);
     }
 
-    private void handleAddLecture(String module, LocalDate date, LocalTime time, String room) {
+    private void handleAddLecture(String module, LocalDate date, LocalTime time, String room, String lecturerName) {
         if (lectureManager.addLecture(module, date, time, room)) {
-            updateResponse("Lecture added successfully:\n" +
-                    new Lecture(module, date, time, room));
+            Lecture lecture = new Lecture(module, date, time, room);
+            updateResponse("Lecture added successfully:\n" + lecture + 
+                           "\nLecturer: " + lecturerName);
+            
+            // Clear the lecturer name field after successful addition
+            lecturerNameField.clear();
         } else {
             showAlert("Error", "Cannot add lecture. Check if there's a conflict or if the module exists.");
         }
     }
 
-    private boolean validateLectureInputs(String module, LocalDate date, String time, String room) {
+    private boolean validateLectureInputs(String module, String lecturerName, LocalDate date, 
+                                        String time, String room) {
         if (module == null || date == null || time == null || room == null) {
-            showAlert("Error", "Please fill in all lecture fields");
+            showAlert("Error", "Please fill in all required lecture fields");
             return false;
         }
+        
+        if (lecturerName == null || lecturerName.trim().isEmpty()) {
+            showAlert("Error", "Please enter a lecturer name");
+            return false;
+        }
+        
         return true;
     }
 
