@@ -6,6 +6,7 @@
 package com.mycompany.client_23375175_23366044;
 import java.io.*;
 import java.net.*;
+import javafx.application.Application;
 
 /**
  *
@@ -18,77 +19,49 @@ public class ClientServer {
     private static BufferedReader in;
     private static PrintWriter out;
 
-    public static void main(String[] args) {
-     try 
-     {
-        host = InetAddress.getLocalHost();
-     } 
-     catch(UnknownHostException e) 
-     {
-	System.out.println("Host ID not found!");
-	System.exit(1);
-     }
-     run();
-   }
+    public ClientServer(){
+        try{
+            host = InetAddress.getLocalHost();
+        } catch (UnknownHostException e){
+            System.out.println("Host not found");
+            System.exit(1);
+        }
+    }
     
-   private static void run() {				
+   public void connectToServer(){				
     try 
     {
 	link = new Socket(host,PORT);		
         
 	in = new BufferedReader(new InputStreamReader(link.getInputStream()));
 	out = new PrintWriter(link.getOutputStream(),true);	 
-        
-        //Manual console input for now
-	BufferedReader userEntry =new BufferedReader(new InputStreamReader(System.in));
-	System.out.println("Enter message to send to server: ");
-        
-        Boolean running = true;
-        while (running) {
-            String message = userEntry.readLine();
-            
-            if(message.equals("QUIT")) {
-                out.println("QUIT");
-                System.out.println("Closing connection...");
-                running = false;
-                continue;
-            }
-            out.println(message);
-            
-            String response = in.readLine();
-            if(response == null) {
-                System.out.println("Server disconnected");
-            } else {
-                System.out.println("Server response: " + response);
-            }
-        }
-	
-        
-    } 
-    catch(IOException e)
-    {
-	e.printStackTrace();
-    } 
-    finally 
-    {
-        closeConnection();
-        } 
+        System.out.println("Connected to server");
+    } catch (IOException e ){
+        System.out.println("Unable to connect to server");
+        e.printStackTrace();
+        System.exit(1);
     }
-   
-   private static void sendMessage(String message){
+ }
+   private void sendMessage(String message){
+       if (out != null){
        out.println(message);
        System.out.println("Message sent to server: " + message);
-       
        listenForResponse(); // waits for server to respond
+    }else {
+           System.out.println("Not connected to server");
+       }
    }
    
-   private static void listenForResponse() {
+   private void listenForResponse() {
        try{
            String response = in.readLine();
-           System.out.println("Server Response: " + response);
-           
-           handleServerResponse(response);
-           
+           if(response != null) {
+               System.out.println("Server response: " + response);
+               handleServerResponse(response);
+           }else {
+               System.out.println("Server disconnected");
+               closeConnection();
+           }
        } 
        catch (IOException e) {
            System.out.println("Error reading response.");
@@ -96,9 +69,9 @@ public class ClientServer {
        }
    }
    
-   private static void handleServerResponse(String response) {
+   private void handleServerResponse(String response) {
        switch (response) {
-           case "SHOW_LECTURE_MENU":
+           case "SHOW_LECTURE_TIMETABLE":
                System.out.println("Fill in later");
                break;
                
@@ -109,6 +82,8 @@ public class ClientServer {
            case "MAIN_MENU":
                System.out.println("Fill in later");
                break;
+               
+          
                
            default:
                System.out.println("Error, unknown server response: " + response);
@@ -128,4 +103,12 @@ public class ClientServer {
                    System.exit(1);
             }
     }
+   
+   public static void main(String[] args) {
+        ClientServer clientServer = new ClientServer();
+        clientServer.connectToServer();
+        
+        ClientGUIWrapper.setClientServer(clientServer);
+        Application.launch(ClientGUIWrapper.class);
+   }
 }

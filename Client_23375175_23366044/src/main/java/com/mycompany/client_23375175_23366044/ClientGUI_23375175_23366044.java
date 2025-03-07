@@ -15,6 +15,12 @@ import javafx.animation.FadeTransition;
 import javafx.util.Duration;
 
 public class ClientGUI_23375175_23366044 extends Application {
+    
+    private ClientServer clientServer;
+    
+    public ClientGUI_23375175_23366044(ClientServer clientServer) {
+        this.clientServer = clientServer;
+    }
     @Override
     public void start(Stage primaryStage) {
         // Create main container
@@ -93,9 +99,5 @@ public class ClientGUI_23375175_23366044 extends Application {
             });
             fadeOut.play();
         });
-    }
-    
-    public static void main(String[] args) {
-        launch(args);
     }
 }
