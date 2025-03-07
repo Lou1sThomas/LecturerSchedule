@@ -79,8 +79,8 @@ public class Server_23375175_23366044{
         message.toUpperCase().trim(); //Failsafe, incase message to server somehow is sent in lowercase or with spaces
         
         switch (message) {
-            case "OPEN_SHOW_LECTURE":
-                out.println("SHOW_LECTURE_MENU");
+            case "OPEN_LECTURE_TIMETABLE":
+                out.println("SHOW_LECTURE_TIMETABLE");
                 break;
                 
             case "OPEN_ADD_LECTURE":
@@ -90,7 +90,7 @@ public class Server_23375175_23366044{
             case "OPEN_REMOVE_LECTURE":
                 out.println("REMOVE_LECTURE_MENU");
                 break;
-                
+                // 
             default:
                 out.println("Unknown Command: " + message);
                 break;  

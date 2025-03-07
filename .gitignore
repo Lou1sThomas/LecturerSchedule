@@ -1,0 +1,110 @@
+*.class
+# Ignore all Maven build artifacts
+target/
+**/target/
+
+# Ignore IDE-specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.vscode/
+*.swp
+*.swo
+
+# Ignore Eclipse files
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+
+# Ignore IntelliJ IDEA files
+out/
+*.log
+*.class
+*.jar
+*.war
+*.ear
+*.db
+*.h2.db
+
+# Ignore NetBeans files
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Ignore logs and temporary files
+*.log
+*.patch
+*.diff
+*.orig
+*.rej
+*.DS_Store
+*.bak
+*.swp
+*~
+
+# Ignore OS-specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Ignore dependency files (if any)
+lib/
+*.jar
+*.war
+*.ear
+
+# Ignore Maven wrapper files (if not using)
+.mvn/
+mvnw
+mvnw.cmd
+
+# Ignore test output
+test-output/
+
+# Ignore other generated files
+*.class
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.pyc
+*.pyo
+*.pyd
+*.ko
+*.cmo
+*.cmi
+*.cmx
+*.cmxa
+*.obj
+*.ilk
+*.pdb
+*.lib
+*.sbr
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.idb
+*.pch
+*.ncb
+*.aps
+*.opensdf
+*.sdf
+*.class
+*.class
