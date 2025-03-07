@@ -5,45 +5,183 @@
 package com.mycompany.client_23375175_23366044;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TimetableViewGUI extends Application {
     private final LecturerManager lectureManager;
-    private TableView<LectureDisplay> timetableView;
-    private Button refreshButton;
+    private GridPane timetableGrid;
+    private LocalDate currentWeekStart;
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
+    private Label weekLabel;
+    private Map<String, Color> moduleColors = new HashMap<>();
+    private final Color[] colorPalette = {
+            Color.LIGHTBLUE, Color.LIGHTGREEN, Color.LIGHTSALMON, 
+            Color.LIGHTPINK, Color.LIGHTYELLOW, Color.LIGHTCORAL, 
+            Color.PLUM, Color.PALETURQUOISE, Color.PEACHPUFF
+    };
+    private int colorIndex = 0;
+    private Stage primaryStage;
 
     public TimetableViewGUI() {
         // Use the singleton to get the shared instance
         this.lectureManager = LecturerManagerSingleton.getInstance();
+        // Initialize to the current week's Monday
+        currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     }
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("Lecturer Timetable");
+        this.primaryStage = primaryStage;
+        primaryStage.setTitle("Weekly Timetable View");
 
-        VBox mainLayout = new VBox(10);
-        mainLayout.setPadding(new Insets(20));
+        BorderPane mainLayout = new BorderPane();
+        mainLayout.setPadding(new Insets(10));
 
-        // Create timetable view
-        createTimetableView();
-        
-        // Add refresh button
-        refreshButton = new Button("Refresh Timetable");
-        refreshButton.setOnAction(e -> populateTimetable());
+        // Create top navigation bar
+        HBox navigationBar = createNavigationBar();
+        mainLayout.setTop(navigationBar);
 
-        // Back to Main Menu button
+        // Create timetable grid
+        ScrollPane scrollPane = new ScrollPane();
+        scrollPane.setFitToWidth(true);
+        timetableGrid = createTimetableGrid();
+        scrollPane.setContent(timetableGrid);
+        mainLayout.setCenter(scrollPane);
+
+        // Create bottom controls
+        HBox bottomControls = createBottomControls();
+        mainLayout.setBottom(bottomControls);
+
+        Scene scene = new Scene(mainLayout, 1000, 600);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        // Populate timetable with initial data
+        populateTimetable();
+    }
+
+    private HBox createNavigationBar() {
+        HBox navbar = new HBox(10);
+        navbar.setPadding(new Insets(10));
+        navbar.setAlignment(Pos.CENTER);
+
+        Button prevWeekBtn = new Button("← Previous Week");
+        Button nextWeekBtn = new Button("Next Week →");
+        Button currentWeekBtn = new Button("Current Week");
+
+        weekLabel = new Label();
+        updateWeekLabel();
+
+        prevWeekBtn.setOnAction(e -> {
+            currentWeekStart = currentWeekStart.minusWeeks(1);
+            updateWeekLabel();
+            populateTimetable();
+        });
+
+        nextWeekBtn.setOnAction(e -> {
+            currentWeekStart = currentWeekStart.plusWeeks(1);
+            updateWeekLabel();
+            populateTimetable();
+        });
+
+        currentWeekBtn.setOnAction(e -> {
+            currentWeekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            updateWeekLabel();
+            populateTimetable();
+        });
+
+        navbar.getChildren().addAll(prevWeekBtn, weekLabel, nextWeekBtn, currentWeekBtn);
+        return navbar;
+    }
+
+    private void updateWeekLabel() {
+        LocalDate weekEnd = currentWeekStart.plusDays(4); // Friday
+        weekLabel.setText(String.format("Week: %s - %s", 
+                dateFormatter.format(currentWeekStart), 
+                dateFormatter.format(weekEnd)));
+    }
+
+    private GridPane createTimetableGrid() {
+        GridPane grid = new GridPane();
+        grid.setGridLinesVisible(true);
+        grid.setHgap(1);
+        grid.setVgap(1);
+        grid.setPadding(new Insets(5));
+
+        // Configure column constraints
+        // First column for time labels
+        ColumnConstraints timeColumn = new ColumnConstraints();
+        timeColumn.setMinWidth(80);
+        timeColumn.setPrefWidth(80);
+        grid.getColumnConstraints().add(timeColumn);
+
+        // Columns for days of the week
+        for (int i = 0; i < 5; i++) { // Monday to Friday
+            ColumnConstraints dayColumn = new ColumnConstraints();
+            dayColumn.setMinWidth(180);
+            dayColumn.setPrefWidth(180);
+            dayColumn.setHgrow(Priority.SOMETIMES);
+            grid.getColumnConstraints().add(dayColumn);
+        }
+
+        // Add day headers
+        for (int day = 0; day < 5; day++) {
+            DayOfWeek dayOfWeek = DayOfWeek.of(day + 1); // Monday=1, Friday=5
+            LocalDate date = currentWeekStart.plusDays(day);
+            Label dayLabel = new Label(dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()) + 
+                                      "\n" + date.format(DateTimeFormatter.ofPattern("dd/MM")));
+            dayLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5;");
+            dayLabel.setAlignment(Pos.CENTER);
+            dayLabel.setMaxWidth(Double.MAX_VALUE);
+            dayLabel.setPrefHeight(40);
+            GridPane.setHalignment(dayLabel, javafx.geometry.HPos.CENTER);
+            grid.add(dayLabel, day + 1, 0); // +1 because first column is for time labels
+        }
+
+        // Add time slots
+        for (int slot = 0; slot < UIConstants.TIME_SLOTS.size(); slot++) {
+            String timeSlot = UIConstants.TIME_SLOTS.get(slot);
+            Label timeLabel = new Label(timeSlot);
+            timeLabel.setStyle("-fx-font-weight: bold; -fx-padding: 5;");
+            timeLabel.setAlignment(Pos.CENTER);
+            timeLabel.setMaxHeight(Double.MAX_VALUE);
+            GridPane.setValignment(timeLabel, javafx.geometry.VPos.CENTER);
+            grid.add(timeLabel, 0, slot + 1); // +1 because first row is for day headers
+        }
+
+        // Initialize grid cells
+        for (int day = 0; day < 5; day++) {
+            for (int slot = 0; slot < UIConstants.TIME_SLOTS.size(); slot++) {
+                Pane emptyCell = new Pane();
+                emptyCell.setStyle("-fx-background-color: white; -fx-border-color: lightgray;");
+                emptyCell.setMinHeight(60);
+                grid.add(emptyCell, day + 1, slot + 1);
+            }
+        }
+
+        return grid;
+    }
+
+    private HBox createBottomControls() {
+        HBox controls = new HBox(10);
+        controls.setPadding(new Insets(10));
+        controls.setAlignment(Pos.CENTER);
+
         Button backButton = new Button("Back to Main Menu");
         backButton.setOnAction(e -> {
             MainMenu mainMenu = new MainMenu();
@@ -55,56 +193,36 @@ public class TimetableViewGUI extends Application {
             }
         });
 
-        Label titleLabel = new Label("Lecturer Timetable");
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        Button refreshButton = new Button("Refresh Timetable");
+        refreshButton.setOnAction(e -> populateTimetable());
 
-        mainLayout.getChildren().addAll(
-                titleLabel,
-                refreshButton,
-                timetableView,
-                backButton
-        );
-
-        Scene scene = new Scene(mainLayout, 800, 600);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        
-        // Populate table when opening
-        populateTimetable();
-    }
-
-    private void createTimetableView() {
-        // Create table columns
-        TableColumn<LectureDisplay, String> moduleColumn = new TableColumn<>("Module");
-        moduleColumn.setCellValueFactory(cellData -> cellData.getValue().moduleProperty());
-        moduleColumn.setPrefWidth(150);
-
-        TableColumn<LectureDisplay, String> lecturerColumn = new TableColumn<>("Lecturer");
-        lecturerColumn.setCellValueFactory(cellData -> cellData.getValue().lecturerProperty());
-        lecturerColumn.setPrefWidth(150);
-
-        TableColumn<LectureDisplay, String> dateColumn = new TableColumn<>("Date");
-        dateColumn.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
-        dateColumn.setPrefWidth(120);
-
-        TableColumn<LectureDisplay, String> timeColumn = new TableColumn<>("Time");
-        timeColumn.setCellValueFactory(cellData -> cellData.getValue().timeProperty());
-        timeColumn.setPrefWidth(100);
-
-        TableColumn<LectureDisplay, String> roomColumn = new TableColumn<>("Room");
-        roomColumn.setCellValueFactory(cellData -> cellData.getValue().roomProperty());
-        roomColumn.setPrefWidth(100);
-
-        // Create table view
-        timetableView = new TableView<>();
-        timetableView.getColumns().addAll(
-                moduleColumn, lecturerColumn, dateColumn, timeColumn, roomColumn
-        );
+        controls.getChildren().addAll(refreshButton, backButton);
+        return controls;
     }
 
     private void populateTimetable() {
-        // Get all lectures
-        List<Lecture> lectures = lectureManager.getAllLectures();
+        // Clear existing color assignments when refreshing
+        moduleColors.clear();
+        colorIndex = 0;
+        
+        // Reset all cells to empty
+        for (int day = 0; day < 5; day++) {
+            for (int slot = 0; slot < UIConstants.TIME_SLOTS.size(); slot++) {
+                Pane emptyCell = new Pane();
+                emptyCell.setStyle("-fx-background-color: white; -fx-border-color: lightgray;");
+                emptyCell.setMinHeight(60);
+                timetableGrid.add(emptyCell, day + 1, slot + 1);
+            }
+        }
+
+        // Get all lectures for the current week
+        List<Lecture> allLectures = lectureManager.getAllLectures();
+        
+        // Filter lectures for the current week (Monday to Friday)
+        LocalDate weekEnd = currentWeekStart.plusDays(6); // Sunday
+        List<Lecture> weekLectures = allLectures.stream()
+                .filter(lecture -> !lecture.getDate().isBefore(currentWeekStart) && !lecture.getDate().isAfter(weekEnd))
+                .collect(Collectors.toList());
 
         // Get all lecturers
         List<Lecturer> lecturers = lectureManager.getAllLecturers();
@@ -116,41 +234,74 @@ public class TimetableViewGUI extends Application {
                         Collectors.mapping(Lecturer::getName, Collectors.toList())
                 ));
 
-        // Create display items
-        List<LectureDisplay> displayItems = new ArrayList<>();
-        
-        for (Lecture lecture : lectures) {
-            String module = lecture.getModule();
+        // Place lectures in the grid
+        for (Lecture lecture : weekLectures) {
+            // Determine day of week (0 = Monday, 4 = Friday)
+            LocalDate lectureDate = lecture.getDate();
+            int dayOfWeek = lectureDate.getDayOfWeek().getValue() - 1; // Convert 1-7 to 0-6
             
-            // Find lecturers for this module
-            List<String> lecturerNames = moduleToLecturers.getOrDefault(module, List.of("Unassigned"));
+            // Skip weekend lectures in this view
+            if (dayOfWeek > 4) continue;
             
-            // Create a display item for each lecturer teaching this module
-            for (String lecturerName : lecturerNames) {
-                displayItems.add(new LectureDisplay(
-                        module,
-                        lecturerName,
-                        lecture.getDate().toString(),
-                        lecture.getTime().toString(),
-                        lecture.getRoom()
-                ));
+            // Determine time slot index
+            String timeStr = lecture.getTime().toString();
+            int timeSlotIndex = UIConstants.TIME_SLOTS.indexOf(timeStr);
+            
+            if (timeSlotIndex != -1) {
+                // Get lecturer names
+                List<String> lecturerNames = moduleToLecturers.getOrDefault(lecture.getModule(), 
+                                                                            Collections.singletonList("Unassigned"));
+                String lecturerString = String.join(", ", lecturerNames);
+                
+                // Create cell content
+                VBox cellContent = createLectureCell(lecture.getModule(), lecturerString, lecture.getRoom());
+                
+                // Add to grid
+                timetableGrid.add(cellContent, dayOfWeek + 1, timeSlotIndex + 1);
             }
         }
-        
-        // If no data, show a message
-        if (displayItems.isEmpty() && (lectures.isEmpty() || lecturers.isEmpty())) {
-            // For empty timetable, we'll add a placeholder row
-            displayItems.add(new LectureDisplay(
-                    "No modules scheduled",
-                    "No lecturers assigned",
-                    "-",
-                    "-",
-                    "-"
-            ));
-        }
+    }
 
-        // Set items in table
-        timetableView.setItems(FXCollections.observableArrayList(displayItems));
+    private VBox createLectureCell(String module, String lecturer, String room) {
+        VBox cell = new VBox(5);
+        cell.setPadding(new Insets(5));
+        cell.setAlignment(Pos.CENTER);
+        
+        // Assign a consistent color to each module
+        if (!moduleColors.containsKey(module)) {
+            moduleColors.put(module, colorPalette[colorIndex % colorPalette.length]);
+            colorIndex++;
+        }
+        
+        Color moduleColor = moduleColors.get(module);
+        String colorStyle = String.format("-fx-background-color: rgba(%d, %d, %d, 0.7);", 
+                (int)(moduleColor.getRed() * 255), 
+                (int)(moduleColor.getGreen() * 255), 
+                (int)(moduleColor.getBlue() * 255));
+        
+        cell.setStyle(colorStyle + "-fx-border-color: gray; -fx-border-radius: 5; -fx-background-radius: 5;");
+        
+        Label moduleLabel = new Label(module);
+        moduleLabel.setStyle("-fx-font-weight: bold;");
+        moduleLabel.setWrapText(true);
+        
+        Label lecturerLabel = new Label(lecturer);
+        lecturerLabel.setWrapText(true);
+        
+        Label roomLabel = new Label("Room: " + room);
+        roomLabel.setWrapText(true);
+        
+        cell.getChildren().addAll(moduleLabel, lecturerLabel, roomLabel);
+        
+        // Add tooltip for more details
+        Tooltip tooltip = new Tooltip(
+                "Module: " + module + "\n" +
+                "Lecturer: " + lecturer + "\n" +
+                "Room: " + room
+        );
+        Tooltip.install(cell, tooltip);
+        
+        return cell;
     }
 
     public static void main(String[] args) {

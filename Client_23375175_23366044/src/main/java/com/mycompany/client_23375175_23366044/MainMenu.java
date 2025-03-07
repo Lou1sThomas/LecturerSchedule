@@ -40,9 +40,9 @@ public class MainMenu extends Application {
 
         Button removeLecturerButton = createStyledButton("Remove Lecturer");
         removeLecturerButton.setOnAction(e -> openRemoveLecturer());
-
-        Button timetableButton = createStyledButton("View Timetable");
-        timetableButton.setOnAction(e -> openTimetableView());
+        
+        Button weeklyViewButton = createStyledButton("Weekly Timetable");
+        weeklyViewButton.setOnAction(e -> openWeeklyTimetableView());
 
         Button exitButton = createStyledButton("Exit");
         exitButton.setOnAction(e -> primaryStage.close());
@@ -52,12 +52,12 @@ public class MainMenu extends Application {
                 titleLabel,
                 schedulerButton,
                 removeLecturerButton,
-                timetableButton,
+                weeklyViewButton,
                 exitButton
         );
 
         // Create scene
-        Scene scene = new Scene(mainLayout, 500, 400);
+        Scene scene = new Scene(mainLayout, 500, 500);
         primaryStage.setScene(scene);
         primaryStage.show();
     }
@@ -86,6 +86,16 @@ public class MainMenu extends Application {
         try {
             TimetableViewGUI timetable = new TimetableViewGUI();
             timetable.start(new Stage());
+            primaryStage.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void openWeeklyTimetableView() {
+        try {
+            TimetableViewGUI weeklyView = new TimetableViewGUI();
+            weeklyView.start(new Stage());
             primaryStage.close();
         } catch (Exception e) {
             e.printStackTrace();

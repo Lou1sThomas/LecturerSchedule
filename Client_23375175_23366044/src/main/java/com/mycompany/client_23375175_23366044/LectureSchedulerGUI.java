@@ -37,6 +37,8 @@ public class LectureSchedulerGUI extends Application {
     private TextField moduleInput;
     private TextField lecturerNameField;
     private Stage primaryStage;
+    // Added variable to store the lecture type
+    private String lectureType = "Lecture"; // Default type
 
     public LectureSchedulerGUI() {
         // Use the singleton to get the shared instance
@@ -143,8 +145,38 @@ public class LectureSchedulerGUI extends Application {
                 FXCollections.observableArrayList(UIConstants.ROOMS)
         );
         roomSelect.setPromptText("Select Room");
+        
+        // Create buttons for lecture types
+        Button lectureButton = new Button("Lecture");
+        Button tutorialButton = new Button("Tutorial");
+        Button labButton = new Button("Lab");
 
-        Button addLectureButton = new Button("Add Lecture");
+        // Set actions for lecture type buttons
+        lectureButton.setOnAction(e -> {
+            lectureType = "Lecture";
+            updateLectureTypeButtons(lectureButton, tutorialButton, labButton);
+        });
+        
+        tutorialButton.setOnAction(e -> {
+            lectureType = "Tutorial";
+            updateLectureTypeButtons(tutorialButton, lectureButton, labButton);
+        });
+        
+        labButton.setOnAction(e -> {
+            lectureType = "Lab";
+            updateLectureTypeButtons(labButton, lectureButton, tutorialButton);
+        });
+        
+        // Set default button style
+        lectureButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        tutorialButton.setStyle("-fx-background-color: #f0f0f0;");
+        labButton.setStyle("-fx-background-color: #f0f0f0;");
+        
+        // Create an HBox for the lecture type buttons
+        HBox lectureTypeBox = new HBox(10, lectureButton, tutorialButton, labButton);
+        lectureTypeBox.setAlignment(Pos.CENTER_LEFT);
+
+        Button addLectureButton = new Button("Add Session");
         addLectureButton.setOnAction(e -> handleAddLectureSubmission(
                 moduleSelect.getValue(),
                 lecturerNameField.getText(),
@@ -159,9 +191,18 @@ public class LectureSchedulerGUI extends Application {
         grid.addRow(3, new Label("Select Date:"), datePicker);
         grid.addRow(4, new Label("Select Time:"), timeSelect);
         grid.addRow(5, new Label("Select Room:"), roomSelect);
-        grid.add(addLectureButton, 1, 6);
+        grid.add(new Label("Session Type:"), 0, 6);
+        grid.add(lectureTypeBox, 1, 6);
+        grid.add(addLectureButton, 1, 7);
 
         return grid;
+    }
+    
+    // Helper method to update button styles based on selection
+    private void updateLectureTypeButtons(Button selectedButton, Button button1, Button button2) {
+        selectedButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
+        button1.setStyle("-fx-background-color: #f0f0f0;");
+        button2.setStyle("-fx-background-color: #f0f0f0;");
     }
 
     private void handleAddLectureSubmission(String module, String lecturerName, LocalDate date,
@@ -184,20 +225,21 @@ public class LectureSchedulerGUI extends Application {
     private void handleAddLecture(String module, LocalDate date, LocalTime time, String room, String lecturerName) {
         if (lectureManager.addLecture(module, date, time, room)) {
             Lecture lecture = new Lecture(module, date, time, room);
-            updateResponse("Lecture added successfully:\n" + lecture + 
-                           "\nLecturer: " + lecturerName);
+            updateResponse(lectureType + " added successfully:\n" + lecture + 
+                           "\nLecturer: " + lecturerName + 
+                           "\nType: " + lectureType);
             
             // Clear the lecturer name field after successful addition
             lecturerNameField.clear();
         } else {
-            showAlert("Error", "Cannot add lecture. Check if there's a conflict or if the module exists.");
+            showAlert("Error", "Cannot add " + lectureType.toLowerCase() + ". Check if there's a conflict or if the module exists.");
         }
     }
 
     private boolean validateLectureInputs(String module, String lecturerName, LocalDate date, 
                                         String time, String room) {
         if (module == null || date == null || time == null || room == null) {
-            showAlert("Error", "Please fill in all required lecture fields");
+            showAlert("Error", "Please fill in all required fields");
             return false;
         }
         

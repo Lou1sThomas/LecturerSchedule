@@ -12,11 +12,12 @@ import javafx.stage.Stage;
  *
  * @author oranc
  */
+
 public class ClientGUIWrapper extends Application {
     
     private static ClientServer clientServerInstance;
     
-    public static void setClientServer(ClientServer clientServer){
+    public static void setClientServer(ClientServer clientServer) {
         clientServerInstance = clientServer;
     }
     
@@ -26,5 +27,4 @@ public class ClientGUIWrapper extends Application {
         ClientGUI_23375175_23366044 gui = new ClientGUI_23375175_23366044(clientServerInstance);
         gui.start(primaryStage);
     }
-    
 }
