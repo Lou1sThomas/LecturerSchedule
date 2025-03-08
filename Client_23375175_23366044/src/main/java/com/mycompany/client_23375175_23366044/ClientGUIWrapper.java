@@ -21,6 +21,10 @@ public class ClientGUIWrapper extends Application {
         clientServerInstance = clientServer;
     }
     
+    public static ClientServer getClientServer() {
+        return clientServerInstance;
+    }
+    
     @Override
     public void start(Stage primaryStage) {
         System.out.println("Starting ClientGUIWrapper");

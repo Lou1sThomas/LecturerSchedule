@@ -42,7 +42,7 @@ public class ClientServer {
         System.exit(1);
     }
  }
-   private void sendMessage(String message){
+   public void sendMessage(String message){
        if (out != null){
        out.println(message);
        System.out.println("Message sent to server: " + message);
@@ -70,26 +70,36 @@ public class ClientServer {
    }
    
    private void handleServerResponse(String response) {
-       switch (response) {
-           case "SHOW_LECTURE_TIMETABLE":
-               System.out.println("Fill in later");
-               break;
-               
-           case "REMOVE_LECTURE_MENU":
-               System.out.println("Fill in later");
-               break;
-           
-           case "MAIN_MENU":
-               System.out.println("Fill in later");
-               break;
-               
-          
-               
-           default:
-               System.out.println("Error, unknown server response: " + response);
-               break;
-       }
-   }
+    switch (response) {
+        case "SHOW_LECTURE_TIMETABLE":
+            System.out.println("Opening lecture timetable view");
+            break;
+            
+        case "REMOVE_LECTURE_MENU":
+            System.out.println("Opening remove lecture menu");
+            break;
+        
+        case "MAIN_MENU":
+            System.out.println("Returning to main menu");
+            break;
+            
+        case "LECTURER_ADDED":
+            System.out.println("Server confirmed: Lecturer has been added");
+            break;
+            
+        case "LECTURER_REMOVED":
+            System.out.println("Server confirmed: Lecturer has been removed");
+            break;
+            
+        case "DISPLAYING_LECTURERS":
+            System.out.println("Server confirmed: Displaying all lecturers");
+            break;
+            
+        default:
+            System.out.println("Error, unknown server response: " + response);
+            break;
+    }
+}
    
    private static void closeConnection() {
        try{

@@ -37,12 +37,16 @@ public class LectureSchedulerGUI extends Application {
     private TextField moduleInput;
     private TextField lecturerNameField;
     private Stage primaryStage;
+    private ClientServer clientServer;
+    
     // Added variable to store the lecture type
     private String lectureType = "Lecture"; // Default type
 
     public LectureSchedulerGUI() {
         // Use the singleton to get the shared instance
         this.lectureManager = LecturerManagerSingleton.getInstance();
+        // Get the client server instance
+        this.clientServer = ClientGUIWrapper.getClientServer();
     }
 
     @Override
@@ -212,15 +216,20 @@ public class LectureSchedulerGUI extends Application {
         }
 
         LocalTime time = LocalTime.parse(timeStr);
-        
+
         // First add lecturer if it doesn't exist
         if (!lecturerNameField.getText().trim().isEmpty()) {
-            lectureManager.addLecturer(lecturerName, module);
+            if (lectureManager.addLecturer(lecturerName, module)) {
+                // Notify the server that a lecturer was added
+                if (clientServer != null) {
+                    clientServer.sendMessage("ADD_LECTURER");
+                }
+            }
         }
-        
-        // Then add lecture
-        handleAddLecture(module, date, time, room, lecturerName);
-    }
+    
+    // Then add lecture
+    handleAddLecture(module, date, time, room, lecturerName);
+}
 
     private void handleAddLecture(String module, LocalDate date, LocalTime time, String room, String lecturerName) {
         if (lectureManager.addLecture(module, date, time, room)) {

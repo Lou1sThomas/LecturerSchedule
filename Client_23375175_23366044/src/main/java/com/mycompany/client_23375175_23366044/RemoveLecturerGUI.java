@@ -21,10 +21,13 @@ public class RemoveLecturerGUI extends Application {
     private ComboBox<String> moduleSelect;
     private TextArea responseArea;
     private Stage primaryStage;
+    private ClientServer clientServer;
 
     public RemoveLecturerGUI() {
         // Use the singleton to get the shared instance
         this.lectureManager = LecturerManagerSingleton.getInstance();
+        // Get the client server instance
+        this.clientServer = ClientGUIWrapper.getClientServer();
     }
 
     @Override
@@ -104,35 +107,47 @@ public class RemoveLecturerGUI extends Application {
     }
     
     private void handleRemoveLecturer() {
-        String lecturerName = lecturerNameField.getText();
-        String module = moduleSelect.getValue();
-        
-        if (lecturerName.trim().isEmpty() || module == null) {
-            showAlert("Error", "Please enter both lecturer name and select a module");
-            return;
-        }
-        
-        if (lectureManager.removeLecturer(lecturerName, module)) {
-            updateResponse("Lecturer successfully removed: " + lecturerName + " from " + module);
-            lecturerNameField.clear();
-        } else {
-            updateResponse("Could not find lecturer: " + lecturerName + " for module: " + module);
-        }
+    String lecturerName = lecturerNameField.getText();
+    String module = moduleSelect.getValue();
+    
+    if (lecturerName.trim().isEmpty() || module == null) {
+        showAlert("Error", "Please enter both lecturer name and select a module");
+        return;
     }
     
-    private void displayAllLecturers() {
-        List<Lecturer> lecturerList = lectureManager.getAllLecturers();
-        if (lecturerList.isEmpty()) {
-            updateResponse("No lecturers found in the system.");
-            return;
+    if (lectureManager.removeLecturer(lecturerName, module)) {
+        updateResponse("Lecturer successfully removed: " + lecturerName + " from " + module);
+        
+        // Notify the server
+        if (clientServer != null) {
+            clientServer.sendMessage("REMOVE_LECTURER");
         }
         
-        StringBuilder sb = new StringBuilder("Current Lecturers:\n\n");
-        for (Lecturer lecturer : lecturerList) {
-            sb.append(lecturer.toString()).append("\n");
-        }
-        updateResponse(sb.toString());
+        lecturerNameField.clear();
+    } else {
+        updateResponse("Could not find lecturer: " + lecturerName + " for module: " + module);
     }
+}
+    
+    private void displayAllLecturers() {
+    List<Lecturer> lecturerList = lectureManager.getAllLecturers();
+    
+    // Notify the server
+    if (clientServer != null) {
+        clientServer.sendMessage("DISPLAY_LECTURERS");
+    }
+    
+    if (lecturerList.isEmpty()) {
+        updateResponse("No lecturers found in the system.");
+        return;
+    }
+    
+    StringBuilder sb = new StringBuilder("Current Lecturers:\n\n");
+    for (Lecturer lecturer : lecturerList) {
+        sb.append(lecturer.toString()).append("\n");
+    }
+    updateResponse(sb.toString());
+}
     
     private void updateModuleList() {
         List<String> modules = lectureManager.getModules();
