@@ -107,8 +107,14 @@ public class Server_23375175_23366044 {
     message = message.toUpperCase().trim(); // Fixed: was assigning but not using the result
     
     switch (message) {
+        
+        case "ENTER SYSTEM":
+            out.println("WELCOME_TO_SYSTEM");
+            System.out.println("Server: Client entered the system");
+            break;
         case "OPEN_LECTURE_TIMETABLE":
             out.println("SHOW_LECTURE_TIMETABLE");
+            System.out.println("Opening timetable...\n");
             break;
             
         case "OPEN_ADD_LECTURE":
