@@ -201,108 +201,130 @@ public class TimetableViewGUI extends Application {
     }
 
     private void populateTimetable() {
-        // Clear existing color assignments when refreshing
-        moduleColors.clear();
-        colorIndex = 0;
-        
-        // Reset all cells to empty
-        for (int day = 0; day < 5; day++) {
-            for (int slot = 0; slot < UIConstants.TIME_SLOTS.size(); slot++) {
-                Pane emptyCell = new Pane();
-                emptyCell.setStyle("-fx-background-color: white; -fx-border-color: lightgray;");
-                emptyCell.setMinHeight(60);
-                timetableGrid.add(emptyCell, day + 1, slot + 1);
-            }
-        }
-
-        // Get all lectures for the current week
-        List<Lecture> allLectures = lectureManager.getAllLectures();
-        
-        // Filter lectures for the current week (Monday to Friday)
-        LocalDate weekEnd = currentWeekStart.plusDays(6); // Sunday
-        List<Lecture> weekLectures = allLectures.stream()
-                .filter(lecture -> !lecture.getDate().isBefore(currentWeekStart) && !lecture.getDate().isAfter(weekEnd))
-                .collect(Collectors.toList());
-
-        // Get all lecturers
-        List<Lecturer> lecturers = lectureManager.getAllLecturers();
-        
-        // Create a map of module to lecturer for quick lookup
-        Map<String, List<String>> moduleToLecturers = lecturers.stream()
-                .collect(Collectors.groupingBy(
-                        Lecturer::getModule,
-                        Collectors.mapping(Lecturer::getName, Collectors.toList())
-                ));
-
-        // Place lectures in the grid
-        for (Lecture lecture : weekLectures) {
-            // Determine day of week (0 = Monday, 4 = Friday)
-            LocalDate lectureDate = lecture.getDate();
-            int dayOfWeek = lectureDate.getDayOfWeek().getValue() - 1; // Convert 1-7 to 0-6
-            
-            // Skip weekend lectures in this view
-            if (dayOfWeek > 4) continue;
-            
-            // Determine time slot index
-            String timeStr = lecture.getTime().toString();
-            int timeSlotIndex = UIConstants.TIME_SLOTS.indexOf(timeStr);
-            
-            if (timeSlotIndex != -1) {
-                // Get lecturer names
-                List<String> lecturerNames = moduleToLecturers.getOrDefault(lecture.getModule(), 
-                                                                            Collections.singletonList("Unassigned"));
-                String lecturerString = String.join(", ", lecturerNames);
-                
-                // Create cell content
-                VBox cellContent = createLectureCell(lecture.getModule(), lecturerString, lecture.getRoom());
-                
-                // Add to grid
-                timetableGrid.add(cellContent, dayOfWeek + 1, timeSlotIndex + 1);
-            }
+    // Clear existing color assignments when refreshing
+    moduleColors.clear();
+    colorIndex = 0;
+    
+    // Reset all cells to empty
+    for (int day = 0; day < 5; day++) {
+        for (int slot = 0; slot < UIConstants.TIME_SLOTS.size(); slot++) {
+            Pane emptyCell = new Pane();
+            emptyCell.setStyle("-fx-background-color: white; -fx-border-color: lightgray;");
+            emptyCell.setMinHeight(60);
+            timetableGrid.add(emptyCell, day + 1, slot + 1);
         }
     }
 
-    private VBox createLectureCell(String module, String lecturer, String room) {
+    // Get all lectures for the current week
+    List<Lecture> allLectures = lectureManager.getAllLectures();
+    
+    // Filter lectures for the current week (Monday to Friday)
+    LocalDate weekEnd = currentWeekStart.plusDays(6); // Sunday
+    List<Lecture> weekLectures = allLectures.stream()
+            .filter(lecture -> !lecture.getDate().isBefore(currentWeekStart) && !lecture.getDate().isAfter(weekEnd))
+            .collect(Collectors.toList());
+
+    // Get all lecturers
+    List<Lecturer> lecturers = lectureManager.getAllLecturers();
+    
+    // Create a map of module to lecturer for quick lookup
+    Map<String, List<String>> moduleToLecturers = lecturers.stream()
+            .collect(Collectors.groupingBy(
+                    Lecturer::getModule,
+                    Collectors.mapping(Lecturer::getName, Collectors.toList())
+            ));
+
+    // Place lectures in the grid
+    for (Lecture lecture : weekLectures) {
+        // Determine day of week (0 = Monday, 4 = Friday)
+        LocalDate lectureDate = lecture.getDate();
+        int dayOfWeek = lectureDate.getDayOfWeek().getValue() - 1; // Convert 1-7 to 0-6
+        
+        // Skip weekend lectures in this view
+        if (dayOfWeek > 4) continue;
+        
+        // Determine time slot index
+        String timeStr = lecture.getTime().toString();
+        int timeSlotIndex = UIConstants.TIME_SLOTS.indexOf(timeStr);
+        
+        if (timeSlotIndex != -1) {
+            // Get lecturer names
+            List<String> lecturerNames = moduleToLecturers.getOrDefault(lecture.getModule(), 
+                                                                      Collections.singletonList("Unassigned"));
+            String lecturerString = String.join(", ", lecturerNames);
+            
+            // Create cell content - pass the session type
+            VBox cellContent = createLectureCell(
+                lecture.getModule(), 
+                lecturerString, 
+                lecture.getRoom(), 
+                lecture.getSessionType());
+            
+            // Add to grid
+            timetableGrid.add(cellContent, dayOfWeek + 1, timeSlotIndex + 1);
+        }
+    }
+}
+
+        private VBox createLectureCell(String module, String lecturer, String room, String sessionType) {
         VBox cell = new VBox(5);
         cell.setPadding(new Insets(5));
         cell.setAlignment(Pos.CENTER);
-        
+
         // Assign a consistent color to each module
         if (!moduleColors.containsKey(module)) {
             moduleColors.put(module, colorPalette[colorIndex % colorPalette.length]);
             colorIndex++;
         }
-        
+
         Color moduleColor = moduleColors.get(module);
-        String colorStyle = String.format("-fx-background-color: rgba(%d, %d, %d, 0.7);", 
+
+        // Adjust color opacity based on session type
+        double opacity = 0.7; // Default for lecture
+
+        // Use different opacity for different session types for visual distinction
+        if ("Lab".equals(sessionType)) {
+            opacity = 0.85;
+        } else if ("Tutorial".equals(sessionType)) {
+            opacity = 0.55;
+        }
+
+        String colorStyle = String.format("-fx-background-color: rgba(%d, %d, %d, %.2f);", 
                 (int)(moduleColor.getRed() * 255), 
                 (int)(moduleColor.getGreen() * 255), 
-                (int)(moduleColor.getBlue() * 255));
-        
+                (int)(moduleColor.getBlue() * 255),
+                opacity);
+
         cell.setStyle(colorStyle + "-fx-border-color: gray; -fx-border-radius: 5; -fx-background-radius: 5;");
-        
+
         Label moduleLabel = new Label(module);
         moduleLabel.setStyle("-fx-font-weight: bold;");
         moduleLabel.setWrapText(true);
-        
+
+        Label typeLabel = new Label(sessionType);
+        typeLabel.setStyle("-fx-font-style: italic;");
+        typeLabel.setWrapText(true);
+
         Label lecturerLabel = new Label(lecturer);
         lecturerLabel.setWrapText(true);
-        
+
         Label roomLabel = new Label("Room: " + room);
         roomLabel.setWrapText(true);
-        
-        cell.getChildren().addAll(moduleLabel, lecturerLabel, roomLabel);
-        
+
+        cell.getChildren().addAll(moduleLabel, typeLabel, lecturerLabel, roomLabel);
+
         // Add tooltip for more details
         Tooltip tooltip = new Tooltip(
                 "Module: " + module + "\n" +
+                "Type: " + sessionType + "\n" +
                 "Lecturer: " + lecturer + "\n" +
                 "Room: " + room
         );
         Tooltip.install(cell, tooltip);
-        
+
         return cell;
     }
+
 
     public static void main(String[] args) {
         launch(args);

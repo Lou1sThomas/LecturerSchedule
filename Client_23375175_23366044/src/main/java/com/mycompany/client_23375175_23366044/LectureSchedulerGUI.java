@@ -209,6 +209,7 @@ public class LectureSchedulerGUI extends Application {
         button2.setStyle("-fx-background-color: #f0f0f0;");
     }
 
+
     private void handleAddLectureSubmission(String module, String lecturerName, LocalDate date,
                                          String timeStr, String room) {
         if (!validateLectureInputs(module, lecturerName, date, timeStr, room)) {
@@ -226,18 +227,18 @@ public class LectureSchedulerGUI extends Application {
                 }
             }
         }
-    
-    // Then add lecture
-    handleAddLecture(module, date, time, room, lecturerName);
-}
+
+        // Then add lecture with session type
+        handleAddLecture(module, date, time, room, lecturerName);
+    }
 
     private void handleAddLecture(String module, LocalDate date, LocalTime time, String room, String lecturerName) {
-        if (lectureManager.addLecture(module, date, time, room)) {
-            Lecture lecture = new Lecture(module, date, time, room);
+        // Use the lectureType variable that's already being set by your buttons
+        if (lectureManager.addLecture(module, date, time, room, lectureType)) {
+            Lecture lecture = new Lecture(module, date, time, room, lectureType);
             updateResponse(lectureType + " added successfully:\n" + lecture + 
-                           "\nLecturer: " + lecturerName + 
-                           "\nType: " + lectureType);
-            
+                           "\nLecturer: " + lecturerName);
+
             // Clear the lecturer name field after successful addition
             lecturerNameField.clear();
         } else {

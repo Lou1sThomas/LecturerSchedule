@@ -56,8 +56,8 @@ public class LecturerManager {
         return new ArrayList<>(lecturers);
     }
 
-    // Lecture Management
-    public boolean addLecture(String module, LocalDate date, LocalTime time, String room) {
+    // Lecture Management with session type
+    public boolean addLecture(String module, LocalDate date, LocalTime time, String room, String sessionType) {
         // Check if module exists
         if (!modules.contains(module)) {
             return false;
@@ -73,12 +73,17 @@ public class LecturerManager {
             return false;
         }
 
-        Lecture lecture = new Lecture(module, date, time, room);
+        Lecture lecture = new Lecture(module, date, time, room, sessionType);
         lectures.add(lecture);
         return true;
     }
+    
+    // For backward compatibility
+    public boolean addLecture(String module, LocalDate date, LocalTime time, String room) {
+        return addLecture(module, date, time, room, "Lecture");
+    }
 
-    public boolean removeLecture(String module, LocalDate date, LocalTime time, String room) {
+    public boolean removeLecture(String module, LocalDate date, LocalTime time, String room, String sessionType) {
         return lectures.removeIf(l ->
                 l.getModule().equals(module) &&
                 l.getDate().equals(date) &&

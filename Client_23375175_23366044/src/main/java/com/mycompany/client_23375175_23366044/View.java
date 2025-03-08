@@ -33,12 +33,12 @@ import javafx.stage.Stage;
  * @author louis
  */
 
-
 public class View extends Application {
     private final LecturerManager lecturerManager;
     private TextArea responseArea;
     private ListView<String> moduleList;
     private ComboBox<String> moduleSelect;
+    private ComboBox<String> sessionType; // Added field for session type
 
     public View() {
         this.lecturerManager = new LecturerManager();
@@ -60,10 +60,18 @@ public class View extends Application {
     }
 
     private void setupMainLayout(VBox mainLayout) {
+        // Add response area that was missing
+        responseArea = new TextArea();
+        responseArea.setPrefHeight(150);
+        responseArea.setEditable(false);
+        
         mainLayout.getChildren().addAll(
                 createModuleSection(),
                 new Separator(),
-                createLectureSection()
+                createLectureSection(),
+                new Separator(),
+                new Label("Response:"),
+                responseArea // Add response area to the layout
         );
     }
 
@@ -135,27 +143,34 @@ public class View extends Application {
         ComboBox<String> roomSelect = new ComboBox<>(
                 FXCollections.observableArrayList(UIConstants.ROOMS)
         );
+        
+        // Create session type dropdown
+        sessionType = new ComboBox<>(
+                FXCollections.observableArrayList("Lecture", "Lab", "Tutorial")
+        );
+        sessionType.setValue("Lecture"); // Default selection
 
         grid.addRow(0, new Label("Select Action:"), actionSelect);
         grid.addRow(1, new Label("Select Module:"), moduleSelect);
         grid.addRow(2, new Label("Select Date:"), datePicker);
         grid.addRow(3, new Label("Select Time:"), timeSelect);
         grid.addRow(4, new Label("Select Room:"), roomSelect);
-
+        grid.addRow(5, new Label("Session Type:"), sessionType); // Add session type to the grid
+        
         Button submitButton = new Button("Submit Request");
-        grid.add(submitButton, 1, 5);
+        grid.add(submitButton, 1, 6); // Move button down one row
 
         submitButton.setOnAction(e -> handleSubmission(
                 actionSelect.getValue(),
                 moduleSelect.getValue(),
                 datePicker.getValue(),
                 timeSelect.getValue(),
-                roomSelect.getValue()
+                roomSelect.getValue(),
+                sessionType.getValue()
         ));
     }
 
-    private void handleSubmission(String action, String module, LocalDate date,
-                                  String timeStr, String room) {
+    private void handleSubmission(String action, String module, LocalDate date, String timeStr, String room, String sessionType) {
         if (action == null) {
             showAlert("Error", "Please select an action.");
             return;
@@ -168,10 +183,10 @@ public class View extends Application {
         LocalTime time = LocalTime.parse(timeStr);
         switch (action) {
             case "Add Lecture":
-                handleAddLecture(module, date, time, room);
+                handleAddLecture(module, date, time, room, sessionType);
                 break;
             case "Remove Lecture":
-                handleRemoveLecture(module, date, time, room);
+                handleRemoveLecture(module, date, time, room, sessionType);
                 break;
             case "Display Schedule":
                 displaySchedule();
@@ -179,17 +194,17 @@ public class View extends Application {
         }
     }
 
- private void handleAddLecture(String module, LocalDate date, LocalTime time, String room) {
-    if (lecturerManager.addLecture(module, date, time, room)) {
-        updateResponse("Lecture added successfully:\n" +
-                new Lecture(module, date, time, room));
-    } else {
-        updateResponse("Failed to add lecture. Check for conflicts or module existence.");
+    private void handleAddLecture(String module, LocalDate date, LocalTime time, String room, String sessionType) {
+        if (lecturerManager.addLecture(module, date, time, room, sessionType)) {
+            updateResponse("Lecture added successfully:\n" +
+                    new Lecture(module, date, time, room, sessionType));
+        } else {
+            updateResponse("Failed to add lecture. Check for conflicts or module existence.");
+        }
     }
-}
 
-    private void handleRemoveLecture(String module, LocalDate date, LocalTime time, String room) {
-        if (lecturerManager.removeLecture(module, date, time, room)) {
+    private void handleRemoveLecture(String module, LocalDate date, LocalTime time, String room, String sessionType) {
+        if (lecturerManager.removeLecture(module, date, time, room, sessionType)) {
             updateResponse("Lecture removed successfully");
         } else {
             updateResponse("Lecture not found");
@@ -229,12 +244,9 @@ public class View extends Application {
         alert.showAndWait();
     }
     
-    
-    
     public static void main(String[] args) {
         launch(args);
     }
-    
 }
 
         

@@ -4,11 +4,6 @@
  */
 package com.mycompany.client_23375175_23366044;
 
-/**
- *
- * @author louis
- */
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -17,12 +12,14 @@ public class Lecture {
     private final LocalDate date;
     private final LocalTime time;
     private final String room;
+    private final String sessionType; // New field for session type
 
-    public Lecture(String module, LocalDate date, LocalTime time, String room) {
+    public Lecture(String module, LocalDate date, LocalTime time, String room, String sessionType) {
         this.module = module;
         this.date = date;
         this.time = time;
         this.room = room;
+        this.sessionType = sessionType != null ? sessionType : "Lecture"; // Default to "Lecture" if null
     }
 
     public String getModule() {
@@ -40,11 +37,14 @@ public class Lecture {
     public String getRoom() {
         return room;
     }
+    
+    public String getSessionType() {
+        return sessionType;
+    }
 
     @Override
     public String toString() {
-        return String.format("Module: %s, Date: %s, Time: %s, Room: %s",
-                module, date, time, room);
+        return String.format("Module: %s, Date: %s, Time: %s, Room: %s, Type: %s",
+                module, date, time, room, sessionType);
     }
 }
-
