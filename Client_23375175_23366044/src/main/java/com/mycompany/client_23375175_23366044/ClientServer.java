@@ -71,6 +71,10 @@ public class ClientServer {
    
    private void handleServerResponse(String response) {
     switch (response) {
+        
+        case "WELCOME_TO_SYSTEM":
+            System.out.println("Successfully connected to the timetable system");
+            break;
         case "SHOW_LECTURE_TIMETABLE":
             System.out.println("Opening lecture timetable view");
             break;

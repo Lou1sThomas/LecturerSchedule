@@ -17,11 +17,18 @@ import javafx.stage.Stage;
 
 public class MainMenu extends Application {
     private Stage primaryStage;
+    private ClientServer clientServer;
+    
+    public MainMenu() {
+    this.clientServer = ClientGUIWrapper.getClientServer();
+    }
+    
 
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
         primaryStage.setTitle("Timetable Manager");
+        
 
         // Create main layout
         VBox mainLayout = new VBox(20);
@@ -64,6 +71,9 @@ public class MainMenu extends Application {
 
     private void openLectureScheduler() {
         try {
+            if (clientServer != null) {
+                clientServer.sendMessage("OPEN_ADD_LECTURE");
+            }
             LectureSchedulerGUI scheduler = new LectureSchedulerGUI();
             scheduler.start(new Stage());
             primaryStage.close();
@@ -74,6 +84,9 @@ public class MainMenu extends Application {
 
     private void openRemoveLecturer() {
         try {
+            if (clientServer != null) {
+                clientServer.sendMessage("OPEN_REMOVE_LECTURE");
+            }
             RemoveLecturerGUI removeLecturer = new RemoveLecturerGUI();
             removeLecturer.start(new Stage());
             primaryStage.close();
@@ -94,6 +107,9 @@ public class MainMenu extends Application {
     
     private void openWeeklyTimetableView() {
         try {
+            if (clientServer != null) {
+                clientServer.sendMessage("OPEN_LECTURE_TIMETABLE");
+            }
             TimetableViewGUI weeklyView = new TimetableViewGUI();
             weeklyView.start(new Stage());
             primaryStage.close();
