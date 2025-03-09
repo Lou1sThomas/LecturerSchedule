@@ -31,8 +31,6 @@ public class MainMenu extends Application {
         primaryStage.setTitle("Timetable Manager");
         
         if (clientServer != null) {
-        clientServer.sendMessage("FETCH_MODULES");
-        clientServer.sendMessage("FETCH_LECTURES");
     }
 
         

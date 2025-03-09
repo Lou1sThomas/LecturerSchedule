@@ -83,7 +83,7 @@ public class ClientGUI_23375175_23366044 extends Application {
         fadeIn.play();
         // Handle enter button click
         enterButton.setOnAction(e -> {
-            clientServer.sendMessage("ME ENTA THE BOMBECLAT SYSTEM");
+            clientServer.sendMessage("ENTER_SYSTEM");
             // Create fade-out transition
             FadeTransition fadeOut = new FadeTransition(Duration.seconds(0.5), content);
             fadeOut.setFromValue(1);
