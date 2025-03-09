@@ -110,15 +110,28 @@ public class LectureSchedulerGUI extends Application {
         return moduleSection;
     }
 
-    private void handleAddModule() {
-        String module = moduleInput.getText();
-        if (lectureManager.addModule(module)) {
-            updateModuleLists();
-            moduleInput.clear();
-        } else {
-            showAlert("Error", "Cannot add module. Maximum 5 modules allowed.");
-        }
+private void handleAddModule() {
+    String module = moduleInput.getText();
+    if (module == null || module.trim().isEmpty()) {
+        showAlert("Error", "Please enter a module name");
+        return;
     }
+    
+    // Send to server first
+    if (clientServer != null) {
+        clientServer.sendMessage("ADD_MODULE:" + module);
+    } else {
+        showAlert("Error", "Not connected to server");
+    }
+    
+    // Update local UI (this will be confirmed by server response)
+    if (lectureManager.addModule(module)) {
+        updateModuleLists();
+        moduleInput.clear();
+    } else {
+        showAlert("Error", "Cannot add module. Maximum 5 modules allowed.");
+    }
+}
 
     private GridPane createLectureSection() {
         GridPane grid = new GridPane();
@@ -232,19 +245,36 @@ public class LectureSchedulerGUI extends Application {
         handleAddLecture(module, date, time, room, lecturerName);
     }
 
-    private void handleAddLecture(String module, LocalDate date, LocalTime time, String room, String lecturerName) {
-        // Use the lectureType variable that's already being set by your buttons
+private void handleAddLecture(String module, LocalDate date, LocalTime time, String room, String lecturerName) {
+    // Format the data to send to the server
+    String lectureData = String.format("%s,%s,%s,%s,%s,%s", 
+                                    module, 
+                                    date.toString(), 
+                                    time.toString(), 
+                                    room, 
+                                    lecturerName,
+                                    lectureType);
+    
+    // Send the data to the server
+    if (clientServer != null) {
+        clientServer.sendMessage("ADD_LECTURE:" + lectureData);
+        
+        // The response will be handled by the ClientServer class
+        // For now, we'll also update locally for UI feedback
         if (lectureManager.addLecture(module, date, time, room, lectureType)) {
             Lecture lecture = new Lecture(module, date, time, room, lectureType);
             updateResponse(lectureType + " added successfully:\n" + lecture + 
-                           "\nLecturer: " + lecturerName);
+                         "\nLecturer: " + lecturerName);
 
             // Clear the lecturer name field after successful addition
             lecturerNameField.clear();
         } else {
             showAlert("Error", "Cannot add " + lectureType.toLowerCase() + ". Check if there's a conflict or if the module exists.");
         }
+    } else {
+        showAlert("Error", "Not connected to server");
     }
+}
 
     private boolean validateLectureInputs(String module, String lecturerName, LocalDate date, 
                                         String time, String room) {

@@ -27,6 +27,8 @@ public class ClientServer {
             System.out.println("Host not found");
             System.exit(1);
         }
+        
+        
     }
     
    public void connectToServer(){				
@@ -54,28 +56,81 @@ public class ClientServer {
    }
    
    private void listenForResponse() {
-       try{
-           String response = in.readLine();
-           if(response != null) {
-               System.out.println("Server response: " + response);
-               handleServerResponse(response);
-           }else {
-               System.out.println("Server disconnected");
-               closeConnection();
-           }
-       } 
-       catch (IOException e) {
-           System.out.println("Error reading response.");
-           e.printStackTrace();
-       }
-   }
+    try {
+        String response = in.readLine();
+        if(response != null) {
+            System.out.println("Server response: " + response);
+            handleServerResponse(response);
+            
+            // Check if this is a response that will be followed by more data
+            if(response.startsWith("LECTURES_COUNT:")) {
+                // Parse the count of lectures to expect
+                int count = Integer.parseInt(response.substring("LECTURES_COUNT:".length()));
+                
+                // Read the expected number of lecture messages
+                for(int i = 0; i < count; i++) {
+                    String lectureData = in.readLine();
+                    if(lectureData != null) {
+                        System.out.println("Server response: " + lectureData);
+                        handleServerResponse(lectureData);
+                    } else {
+                        System.out.println("Server disconnected while sending lectures");
+                        closeConnection();
+                        break;
+                    }
+                }
+            }
+        } else {
+            System.out.println("Server disconnected");
+            closeConnection();
+        }
+    } 
+    catch (IOException e) {
+        System.out.println("Error reading response.");
+        e.printStackTrace();
+    }
+}
    
    private void handleServerResponse(String response) {
-       if (response.startsWith("ERROR_UNSUPPORTED_SERVICE:")) {
+    if (response.startsWith("ERROR_UNSUPPORTED_SERVICE:")) {
         String errorMessage = response.substring("ERROR_UNSUPPORTED_SERVICE:".length());
         System.out.println("Server error: " + errorMessage);
         showErrorMessage(errorMessage);
         return;
+    }
+    
+    if (response.startsWith("SUCCESS:")) {
+        String successMessage = response.substring("SUCCESS:".length());
+        System.out.println("Server success: " + successMessage);
+        showSuccessMessage(successMessage);
+        return;
+    }
+    
+    if (response.startsWith("ERROR:")) {
+        String errorMessage = response.substring("ERROR:".length());
+        System.out.println("Server error: " + errorMessage);
+        showErrorMessage(errorMessage);
+        return;
+    }
+    
+    if (response.startsWith("LECTURES_COUNT:")) {
+    int count = Integer.parseInt(response.substring("LECTURES_COUNT:".length()));
+    System.out.println("Server will send " + count + " lectures");
+    return;
+    }
+
+    if (response.startsWith("LECTURE:")) {
+    String lectureData = response.substring("LECTURE:".length());
+    System.out.println("Received lecture: " + lectureData);
+    // Here you would process the lecture data and update the UI
+    // This depends on your application's architecture
+    return;
+    }
+
+    if (response.equals("INFO: No lectures available")) {
+    System.out.println("No lectures available on server");
+    showInfoMessage("No lectures are currently scheduled on the server.");
+    return;
     }
        switch (response) {
         
@@ -122,6 +177,7 @@ public class ClientServer {
     }
 }
    
+   
    private static void closeConnection() {
        try{
            System.out.println("\n Closing Conecction...");
@@ -154,4 +210,24 @@ public class ClientServer {
         ClientGUIWrapper.setClientServer(clientServer);
         Application.launch(ClientGUIWrapper.class);
    }
+   
+   private void showSuccessMessage(String message) {
+    javafx.application.Platform.runLater(() -> {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText("Operation Successful");
+        alert.setContentText(message);
+        alert.showAndWait();
+    });
+}
+   
+   private void showInfoMessage(String message) {
+    javafx.application.Platform.runLater(() -> {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText("Server Information");
+        alert.setContentText(message);
+        alert.showAndWait();
+    });
+}
 }
