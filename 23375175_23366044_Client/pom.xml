@@ -1,0 +1,54 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mycompany</groupId>
+    <artifactId>23375175_23366044_Client</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <!-- ✅ Set Java version (adjust if you're using Java 21, 17, etc.) -->
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <javafx.version>17.0.9</javafx.version>
+    </properties>
+
+    <!-- ✅ JavaFX dependencies (needed for GUI) -->
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+    </dependencies>
+
+    <!-- ✅ The JavaFX Maven plugin for launching the GUI application -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>  <!-- Latest working version -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>run</goal>  <!-- This is what allows `mvn javafx:run` to work -->
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- Full path to your JavaFX application's main class -->
+                    <mainClass>com.mycompany._23366044_Client.ClientServer</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <name>23375175_23366044_Client</name>
+</project>
