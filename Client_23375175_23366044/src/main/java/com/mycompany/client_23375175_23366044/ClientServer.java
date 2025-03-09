@@ -7,6 +7,7 @@ package com.mycompany.client_23375175_23366044;
 import java.io.*;
 import java.net.*;
 import javafx.application.Application;
+import javafx.scene.control.Alert;
 
 /**
  *
@@ -70,7 +71,13 @@ public class ClientServer {
    }
    
    private void handleServerResponse(String response) {
-    switch (response) {
+       if (response.startsWith("ERROR_UNSUPPORTED_SERVICE:")) {
+        String errorMessage = response.substring("ERROR_UNSUPPORTED_SERVICE:".length());
+        System.out.println("Server error: " + errorMessage);
+        showErrorMessage(errorMessage);
+        return;
+    }
+       switch (response) {
         
         case "WELCOME_TO_SYSTEM":
             System.out.println("Successfully connected to the timetable system");
@@ -99,9 +106,19 @@ public class ClientServer {
             System.out.println("Server confirmed: Displaying all lecturers");
             break;
             
+        case "OTHER_MENU":
+            System.out.println("Opening other service menu");
+            break;
+            
         default:
             System.out.println("Error, unknown server response: " + response);
             break;
+            
+
+            
+            
+            
+            
     }
 }
    
@@ -117,6 +134,18 @@ public class ClientServer {
                    System.exit(1);
             }
     }
+   
+   
+   private void showErrorMessage(String message) {
+    // We need to use Platform.runLater since this might be called from a non-JavaFX thread
+    javafx.application.Platform.runLater(() -> {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Server Exception");
+        alert.setHeaderText("Unsupported Service");
+        alert.setContentText("The server encountered an exception: " + message);
+        alert.showAndWait();
+    });
+   }
    
    public static void main(String[] args) {
         ClientServer clientServer = new ClientServer();

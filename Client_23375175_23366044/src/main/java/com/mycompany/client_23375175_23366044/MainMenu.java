@@ -50,6 +50,9 @@ public class MainMenu extends Application {
         
         Button weeklyViewButton = createStyledButton("Weekly Timetable");
         weeklyViewButton.setOnAction(e -> openWeeklyTimetableView());
+        
+        Button otherButton = createStyledButton("Other");
+        otherButton.setOnAction(e -> openOtherMenu());
 
         Button exitButton = createStyledButton("Exit");
         exitButton.setOnAction(e -> primaryStage.close());
@@ -60,6 +63,7 @@ public class MainMenu extends Application {
                 schedulerButton,
                 removeLecturerButton,
                 weeklyViewButton,
+                otherButton,
                 exitButton
         );
 
@@ -117,6 +121,19 @@ public class MainMenu extends Application {
             e.printStackTrace();
         }
     }
+    
+    private void openOtherMenu() {
+    try {
+        if (clientServer != null) {
+            clientServer.sendMessage("OPEN_OTHER_MENU");
+        }
+        OtherMenuGUI otherMenu = new OtherMenuGUI();
+        otherMenu.start(new Stage());
+        primaryStage.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
 
     // Helper method to create styled buttons
     private Button createStyledButton(String text) {

@@ -51,6 +51,31 @@ public class LecturerManager {
                 l.getName().equals(name) && l.getModule().equals(module)
         );
     }
+    
+    // New method: Remove all lectures for a specific module
+    public int removeAllLecturesForModule(String module) {
+        int count = 0;
+        List<Lecture> lecturesToRemove = lectures.stream()
+                .filter(l -> l.getModule().equals(module))
+                .collect(Collectors.toList());
+        
+        for (Lecture lecture : lecturesToRemove) {
+            if (removeLecture(lecture.getModule(), lecture.getDate(), lecture.getTime(), 
+                           lecture.getRoom(), lecture.getSessionType())) {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
+    // New method: Find lecturer by name and module
+    public Lecturer findLecturer(String name, String module) {
+        return lecturers.stream()
+                .filter(l -> l.getName().equals(name) && l.getModule().equals(module))
+                .findFirst()
+                .orElse(null);
+    }
 
     public List<Lecturer> getAllLecturers() {
         return new ArrayList<>(lecturers);
