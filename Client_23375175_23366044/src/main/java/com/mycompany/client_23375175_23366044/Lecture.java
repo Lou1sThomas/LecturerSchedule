@@ -7,6 +7,7 @@ package com.mycompany.client_23375175_23366044;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+// Model class
 public class Lecture {
     private final String module;
     private final LocalDate date;

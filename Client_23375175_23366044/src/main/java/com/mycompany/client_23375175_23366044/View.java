@@ -33,6 +33,7 @@ import javafx.stage.Stage;
  * @author louis
  */
 
+// View Class
 public class View extends Application {
     private final LecturerManager lecturerManager;
     private TextArea responseArea;

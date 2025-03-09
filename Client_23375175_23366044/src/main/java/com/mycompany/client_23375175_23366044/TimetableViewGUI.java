@@ -22,6 +22,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
+//View Class
 public class TimetableViewGUI extends Application {
     private final LecturerManager lectureManager;
     private GridPane timetableGrid;

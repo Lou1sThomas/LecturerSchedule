@@ -17,6 +17,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 
+// View Class
 public class OtherMenuGUI extends Application {
     private Stage primaryStage;
     private ClientServer clientServer;

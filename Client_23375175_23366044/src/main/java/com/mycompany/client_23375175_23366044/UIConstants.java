@@ -11,6 +11,8 @@ import java.util.List;
  *
  * @author louis
  */
+
+// View Class
 public class UIConstants {
     
 public static final List<String> TIME_SLOTS = Arrays.asList(

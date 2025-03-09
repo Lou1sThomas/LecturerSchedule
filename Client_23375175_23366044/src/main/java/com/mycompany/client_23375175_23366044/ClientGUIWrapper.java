@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 
+// View/ helper class
 package com.mycompany.client_23375175_23366044;
 
 import javafx.application.Application;

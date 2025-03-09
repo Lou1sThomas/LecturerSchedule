@@ -11,6 +11,8 @@ import java.util.List;
  * Singleton class to manage a single instance of LecturerManager
  * This ensures data is shared across different parts of the application
  */
+
+// Controller Class
 public class LecturerManagerSingleton {
     private static LecturerManager instance;
     private final List<String> modules = new ArrayList<>();

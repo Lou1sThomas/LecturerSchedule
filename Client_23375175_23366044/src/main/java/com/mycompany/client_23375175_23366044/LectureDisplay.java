@@ -8,6 +8,8 @@ package com.mycompany.client_23375175_23366044;
  *
  * @author louis
  */
+
+// Model Class
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 

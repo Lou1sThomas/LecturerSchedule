@@ -18,6 +18,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+// View Class
 public class RemoveLecturerGUI extends Application {
     private final LecturerManager lectureManager;
     private TextField lecturerNameField;

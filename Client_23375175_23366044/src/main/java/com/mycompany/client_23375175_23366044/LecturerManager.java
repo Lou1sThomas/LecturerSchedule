@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// Controller Class
 public class LecturerManager {
     private final List<String> modules;
     private final List<Lecture> lectures;

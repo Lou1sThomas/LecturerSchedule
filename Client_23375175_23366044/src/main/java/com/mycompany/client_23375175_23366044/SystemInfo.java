@@ -1,5 +1,6 @@
 package com.mycompany.client_23375175_23366044;
 
+// Helper Class
 public class SystemInfo {
 
     public static String javaVersion() {

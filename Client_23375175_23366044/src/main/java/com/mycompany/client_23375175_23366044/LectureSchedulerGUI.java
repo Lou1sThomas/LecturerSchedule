@@ -9,6 +9,7 @@ package com.mycompany.client_23375175_23366044;
  * @author louis
  */
 
+// View Class
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;

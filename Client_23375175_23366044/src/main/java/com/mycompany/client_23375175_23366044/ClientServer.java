@@ -13,6 +13,8 @@ import javafx.scene.control.Alert;
  *
  * @author oranc
  */
+
+// Model class
 public class ClientServer {
     private static InetAddress host;
     private static final int PORT = 6754;
@@ -149,6 +151,7 @@ public class ClientServer {
         
         switch (response) {
             case "WELCOME_TO_SYSTEM":
+                
                 System.out.println("Successfully connected to the timetable system");
                 break;
             case "SHOW_LECTURE_TIMETABLE":
@@ -156,6 +159,7 @@ public class ClientServer {
                 break;
             case "ADD_LECTURE_MENU":
                 System.out.println("Opening add lecture menu");
+                
                 break;
             case "REMOVE_LECTURE_MENU":
                 System.out.println("Opening remove lecture menu");
