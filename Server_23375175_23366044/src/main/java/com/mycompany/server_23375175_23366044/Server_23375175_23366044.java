@@ -139,7 +139,7 @@ public class Server_23375175_23366044 {
 
                 // Handle standard commands
                 switch (message) {
-                    case "ENTER SYSTEM":
+                    case "ENTER_SYSTEM":
                         out.println("WELCOME_TO_SYSTEM");
                         System.out.println("Server: Client entered the system");
                         break;
