@@ -104,51 +104,66 @@ public class Server_23375175_23366044 {
         }
         
         private static void processeMessageHandler(String message, PrintWriter out) {
-    message = message.toUpperCase().trim(); // Fixed: was assigning but not using the result
-    
-    switch (message) {
-        
-        case "ENTER SYSTEM":
-            out.println("WELCOME_TO_SYSTEM");
-            System.out.println("Server: Client entered the system");
-            break;
-        case "OPEN_LECTURE_TIMETABLE":
-            out.println("SHOW_LECTURE_TIMETABLE");
-            System.out.println("Opening timetable...\n");
-            break;
-            
-        case "OPEN_ADD_LECTURE":
-            out.println("ADD_LECTURE_MENU");
-            break;
-        
-        case "OPEN_REMOVE_LECTURE":
-            out.println("REMOVE_LECTURE_MENU");
-            break;
-            
-        case "ADD_LECTURER":
-            out.println("LECTURER_ADDED");
-            System.out.println("Server: Lecturer added successfully");
-            break;
-            
-        case "REMOVE_LECTURER":
-            out.println("LECTURER_REMOVED");
-            System.out.println("Server: Lecturer removed successfully");
-            break;
-            
-        case "DISPLAY_LECTURERS":
-            out.println("DISPLAYING_LECTURERS");
-            System.out.println("Server: Displaying all lecturers");
-            break;
-            
-        case "MAIN_MENU":
-            out.println("MAIN_MENU");
-            break;
-            
-        default:
-            out.println("Unknown Command: " + message);
-            break;  
-    }
+            try {
+                // Check if it's a custom service request
+                if (message.startsWith("REQUEST_OTHER_SERVICE:")) {
+                    String requestedService = message.substring("REQUEST_OTHER_SERVICE:".length());
+                    System.out.println("Client requested unsupported service: " + requestedService);
+                    throw new IncorrectActionException("Unsupported service requested: " + requestedService);
+                }
+
+                message = message.toUpperCase().trim();
+
+                switch (message) {
+                    case "ENTER SYSTEM":
+                        out.println("WELCOME_TO_SYSTEM");
+                        System.out.println("Server: Client entered the system");
+                        break;
+                    case "OPEN_LECTURE_TIMETABLE":
+                        out.println("SHOW_LECTURE_TIMETABLE");
+                        System.out.println("Server: Client opened the Lecture Timetable");
+                        System.out.println("Opening timetable...\n");
+                        break;
+                    case "OPEN_ADD_LECTURE":
+                        out.println("ADD_LECTURE_MENU");
+                        System.out.println("Server: Client has entered the System Menu");
+                        break;
+                    case "OPEN_REMOVE_LECTURE":
+                        out.println("REMOVE_LECTURE_MENU");
+                        System.out.println("Server: Client has opened remove Lecture Menu");
+                        break;
+                    case "ADD_LECTURER":
+                        out.println("LECTURER_ADDED");
+                        System.out.println("Server: Lecturer added successfully");
+                        break;
+                    case "REMOVE_LECTURER":
+                        out.println("LECTURER_REMOVED");
+                        System.out.println("Server: Lecturer removed successfully");
+                        break;
+                    case "DISPLAY_LECTURERS":
+                        out.println("DISPLAYING_LECTURERS");
+                        System.out.println("Server: Displaying all lecturers");
+                        break;
+                    case "MAIN_MENU":
+                        out.println("MAIN_MENU");
+                        System.out.println("Server: Lecturer has entered the MainMenu");
+                        break;
+                    case "OPEN_OTHER_MENU":
+                        out.println("OTHER_MENU");
+                        System.out.println("Opening other services menu...");
+                        break;
+                    default:
+                        if (!message.contains("REQUEST_OTHER_SERVICE:")) {
+                            out.println("Unknown Command: " + message);
+                        }
+                        break;
+                }
+            } catch (IncorrectActionException e) {
+                System.out.println("IncorrectActionException: " + e.getMessage());
+                out.println("ERROR_UNSUPPORTED_SERVICE:" + e.getMessage());
+            }
 }
+
         
         private void processAddLecture(String lectureData) {
             String[] parts = lectureData.split(",");
@@ -214,3 +229,6 @@ public class Server_23375175_23366044 {
         }
     }
 }
+    
+    
+
