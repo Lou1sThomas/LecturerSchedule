@@ -15,6 +15,7 @@ public class Lecture {
     private final String room;
     private final String sessionType; // New field for session type
 
+    //Constructor for Lecture
     public Lecture(String module, LocalDate date, LocalTime time, String room, String sessionType) {
         this.module = module;
         this.date = date;
