@@ -18,31 +18,17 @@ public class Lecturer {
     private final String name;
     private final String module;
 
-    /**
-     * Constructor to initialize a Lecturer object.
-     * 
-     * @param name   The name of the lecturer
-     * @param module The module they teach
-     */
     public Lecturer(String name, String module) {
         this.name = name;
         this.module = module;
     }
 
-    /**
-     * Gets the name of the lecturer.
-     * 
-     * @return The lecturer's name
-     */
+
     public String getName() {
         return name;
     }
 
-    /**
-     * Gets the module the lecturer teaches.
-     * 
-     * @return The module name
-     */
+
     public String getModule() {
         return module;
     }

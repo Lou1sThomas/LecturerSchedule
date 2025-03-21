@@ -116,7 +116,7 @@ public class LectureSchedulerGUI extends Application {
 
 private void handleAddModule() {
     String module = moduleInput.getText();
-    if (module == null || module.trim().isEmpty()) {
+    if (module == null || module.isEmpty()) {
         showAlert("Error", "Please enter a module name");
         return;
     }
