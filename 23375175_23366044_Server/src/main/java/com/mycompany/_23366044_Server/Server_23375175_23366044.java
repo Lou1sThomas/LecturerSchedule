@@ -1,11 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.mycompany._23366044_Server;
 
 import java.io.*;
-import static java.lang.System.out;
 import java.net.*;
 import java.util.*;
 
@@ -13,48 +8,49 @@ public class Server_23375175_23366044 {
     private static ServerSocket servSock;
     private static final int PORT = 6754;
     private static int clientCounter = 0;
+    private ServerGUI gui;
     
     // Storage structures for lectures and lecturers
     private static final List<Map<String, String>> lectures = new ArrayList<>();
     private static final List<Map<String, String>> lecturers = new ArrayList<>();
     private static final Set<String> modules = new HashSet<>();
     
-    // Define the custom exception class
     private static class IncorrectActionException extends Exception {
         public IncorrectActionException(String message) {
             super(message);
         }
     }
-    
-    public static void main(String[] args) {
-        System.out.println("Opening Port...\n");
+
+    public void startServer(ServerGUI gui) {
+        this.gui = gui;
+        ServerGUI.updateLog("Opening Port...\n");
         try {
             servSock = new ServerSocket(PORT);
-            System.out.println("Server started on port " + PORT);
-            System.out.println("Waiting for clients...");
+            ServerGUI.updateLog("Server started on port " + PORT);
+            ServerGUI.updateLog("Waiting for clients...");
         } catch (IOException e) {
-            System.out.println("Unable to attach to port.");
-            System.exit(1);
+            ServerGUI.updateLog("Unable to attach to port.");
+            return;
         }
         
         while (true) {
             try {
                 Socket clientSocket = servSock.accept();
                 clientCounter++;
-                System.out.println("Client #" + clientCounter + " connected from " + clientSocket.getInetAddress().getHostAddress());
+                ServerGUI.updateLog("Client #" + clientCounter + " connected from " + 
+                    clientSocket.getInetAddress().getHostAddress());
+                ServerGUI.updateClientCount(clientCounter);
                 
                 new Thread(new ClientHandler(clientSocket, clientCounter)).start();
             } catch (IOException e) {
-                System.out.println("Accept failed: " + e.getMessage());
+                ServerGUI.updateLog("Accept failed: " + e.getMessage());
                 break;
             }
         }
-        
-        try {
-            servSock.close();
-        } catch (IOException e) {
-            System.out.println("Could not close server socket: " + e.getMessage());
-        }
+    }
+
+    public static void main(String[] args) {
+        ServerGUI.main(args);
     }
     
     private static class ClientHandler implements Runnable {
@@ -75,110 +71,86 @@ public class Server_23375175_23366044 {
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 
                 out.println("WELCOME_TO_SYSTEM");
-                System.out.println("Handling client #" + clientId);
+                ServerGUI.updateLog("Handling client #" + clientId);
                 
                 boolean running = true;
                 while (running) {
                     String message = in.readLine();
                     if (message == null) {
-                        System.out.println("Client " + clientId + " disconnected");
+                        ServerGUI.updateLog("Client " + clientId + " disconnected");
                         break;
                     }
                     
-                    System.out.println("Message received from client #" + clientId + ": " + message);
+                    ServerGUI.updateLog("Message received from client #" + clientId + ": " + message);
                     
                     if (message.equals("QUIT")) {
                         out.println("Closing Lecture Scheduler");
-                        System.out.println("Client " + clientId + " closed connection");
+                        ServerGUI.updateLog("Client " + clientId + " closed connection");
                         running = false;
                     } else {
                         processMessageHandler(message, out);
                     }
                 }
             } catch (IOException e) {
-                System.out.println("Error handling client #" + clientId + ": " + e.getMessage());
+                ServerGUI.updateLog("Error handling client #" + clientId + ": " + e.getMessage());
             } finally {
                 try {
                     clientSocket.close();
-                    System.out.println("Client #" + clientId + " disconnected");
+                    clientCounter--;
+                    ServerGUI.updateLog("Client #" + clientId + " disconnected");
+                    ServerGUI.updateClientCount(clientCounter);
                 } catch (IOException e) {
-                    System.out.println("Error closing client socket: " + e.getMessage());
+                    ServerGUI.updateLog("Error closing client socket: " + e.getMessage());
                 }
             }
         }
         
         private void processMessageHandler(String message, PrintWriter out) {
             try {
-                // Check if it's a custom service request
                 if (message.startsWith("REQUEST_OTHER_SERVICE:")) {
                     String requestedService = message.substring("REQUEST_OTHER_SERVICE:".length());
-                    System.out.println("Client requested unsupported service: " + requestedService);
+                    ServerGUI.updateLog("Client requested unsupported service: " + requestedService);
                     throw new IncorrectActionException("Unsupported service requested: " + requestedService);
                 }
 
-                // Handle add lecture message
                 if (message.startsWith("ADD_LECTURE:")) {
                     String lectureData = message.substring("ADD_LECTURE:".length());
                     processAddLecture(lectureData, out);
                     return;
                 }
                 
-                // Handle add module message
                 if (message.startsWith("ADD_MODULE:")) {
                     String moduleData = message.substring("ADD_MODULE:".length());
                     processAddModule(moduleData, out);
                     return;
                 }
                 
-                // Handle add lecturer message
                 if (message.startsWith("ADD_LECTURER:")) {
                     String lecturerData = message.substring("ADD_LECTURER:".length());
                     processAddLecturer(lecturerData, out);
                     return;
                 }
 
-                // Handle standard commands
                 switch (message) {
                     case "ENTER_SYSTEM":
                         out.println("WELCOME_TO_SYSTEM");
-                        System.out.println("Server: Client entered the system");
+                        ServerGUI.updateLog("Client entered the system");
                         break;
                     case "OPEN_LECTURE_TIMETABLE":
                         out.println("SHOW_LECTURE_TIMETABLE");
-                        System.out.println("Server: Client opened the Lecture Timetable");
-                        System.out.println("Opening timetable...\n");
+                        ServerGUI.updateLog("Client opened the Lecture Timetable");
                         break;
                     case "OPEN_ADD_LECTURE":
                         out.println("ADD_LECTURE_MENU");
-                        System.out.println("Server: Client has entered the System Menu");
+                        ServerGUI.updateLog("Client has entered the System Menu");
                         break;
                     case "OPEN_REMOVE_LECTURE":
                         out.println("REMOVE_LECTURE_MENU");
-                        System.out.println("Server: Client has opened remove Lecture Menu");
-                        break;
-                    case "ADD_LECTURER":
-                        out.println("LECTURER_ADDED");
-                        System.out.println("Server: Lecturer added successfully");
-                        break;
-                    case "REMOVE_LECTURER":
-                        out.println("LECTURER_REMOVED");
-                        System.out.println("Server: Lecturer removed successfully");
-                        break;
-                    case "DISPLAY_LECTURERS":
-                        out.println("DISPLAYING_LECTURERS");
-                        System.out.println("Server: Displaying all lecturers");
-                        break;
-                    case "MAIN_MENU":
-                        out.println("MAIN_MENU");
-                        System.out.println("Server: Lecturer has entered the MainMenu");
-                        break;
-                    case "OPEN_OTHER_MENU":
-                        out.println("OTHER_MENU");
-                        System.out.println("Opening other services menu...");
+                        ServerGUI.updateLog("Client has opened remove Lecture Menu");
                         break;
                     case "FETCH_LECTURES":
                         sendLectures(out);
-                        System.out.println("Server: Sending lectures to client");
+                        ServerGUI.updateLog("Sending lectures to client");
                         break;
                     default:
                         if (!message.contains("REQUEST_OTHER_SERVICE:")) {
@@ -187,7 +159,7 @@ public class Server_23375175_23366044 {
                         break;
                 }
             } catch (IncorrectActionException e) {
-                System.out.println("IncorrectActionException: " + e.getMessage());
+                ServerGUI.updateLog("IncorrectActionException: " + e.getMessage());
                 out.println("ERROR_UNSUPPORTED_SERVICE:" + e.getMessage());
             }
         }
@@ -213,7 +185,7 @@ public class Server_23375175_23366044 {
                 } else {
                     lectures.add(lecture);
                     out.println("SUCCESS: " + parts[5] + " added successfully for " + parts[0]);
-                    System.out.println("Server: Lecture added: " + parts[5] + " for " + parts[0]);
+                    ServerGUI.updateLog("Lecture added: " + parts[5] + " for " + parts[0]);
                 }
             } else {
                 out.println("ERROR: Invalid lecture data format");
@@ -228,7 +200,7 @@ public class Server_23375175_23366044 {
             } else {
                 modules.add(moduleData);
                 out.println("SUCCESS: Module added: " + moduleData);
-                System.out.println("Server: Module added: " + moduleData);
+                ServerGUI.updateLog("Module added: " + moduleData);
             }
         }
         
@@ -251,7 +223,7 @@ public class Server_23375175_23366044 {
                     lecturer.put("module", module);
                     lecturers.add(lecturer);
                     out.println("SUCCESS: Lecturer added: " + name + " for " + module);
-                    System.out.println("Server: Lecturer added: " + name + " for " + module);
+                    ServerGUI.updateLog("Lecturer added: " + name + " for " + module);
                 }
             } else {
                 out.println("ERROR: Invalid lecturer data format");
@@ -262,10 +234,7 @@ public class Server_23375175_23366044 {
             if (lectures.isEmpty()) {
                 out.println("INFO: No lectures available");
             } else {
-                // Send the number of lectures first
                 out.println("LECTURES_COUNT:" + lectures.size());
-                
-                // Then send each lecture
                 for (Map<String, String> lecture : lectures) {
                     String lectureStr = String.format("LECTURE:%s,%s,%s,%s,%s,%s",
                         lecture.get("module"),
@@ -280,6 +249,3 @@ public class Server_23375175_23366044 {
         }
     }
 }
-    
-    
-
