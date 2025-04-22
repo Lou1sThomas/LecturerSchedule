@@ -130,6 +130,25 @@ public class Server_23375175_23366044 {
                     processAddLecturer(lecturerData, out);
                     return;
                 }
+                
+                if (message.equals("REQUEST_EARLY_LECTURES")) {
+                    
+            LectureOptimizer optimizer = new LectureOptimizer(lectures);
+            try {
+                if (optimizer.canOptimize()) {
+                    optimizer.optimizeSchedule();
+                    out.println("SUCCESS: Lectures have been optimized for earlier times");
+                    ServerGUI.updateLog("Lectures optimized successfully");
+                } else {
+                    out.println("INFO: Lectures are already optimized for earliest possible times");
+                    ServerGUI.updateLog("No optimization possible");
+                }
+            } catch (Exception e) {
+                out.println("ERROR: Failed to optimize lectures");
+                ServerGUI.updateLog("Optimization failed: " + e.getMessage());
+            }
+            return;
+        }
 
                 switch (message) {
                     case "ENTER_SYSTEM":
@@ -152,6 +171,7 @@ public class Server_23375175_23366044 {
                         sendLectures(out);
                         ServerGUI.updateLog("Sending lectures to client");
                         break;
+                  
                     default:
                         if (!message.contains("REQUEST_OTHER_SERVICE:")) {
                             out.println("Unknown Command: " + message);
