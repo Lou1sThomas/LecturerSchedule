@@ -176,6 +176,12 @@ public class ClientServer {
             case "OTHER_MENU":
                 System.out.println("Opening other service menu");
                 break;
+            case "SUCCESS: Lectures have been optimized for earlier times":
+                showSuccessMessage("Lectures have been successfully moved to earlier time slots.");
+                break;
+            case "INFO: Lectures are already optimized for earliest possible times":
+            showInfoMessage("Lectures are already scheduled at the earliest possible times.");
+                break;
             default:
                 System.out.println("Unknown server response: " + response);
                 break;

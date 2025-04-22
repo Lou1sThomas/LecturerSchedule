@@ -62,12 +62,20 @@ public class MainMenu extends Application {
         Button exitButton = createStyledButton("Exit");
         exitButton.setOnAction(e -> primaryStage.close());
 
+        Button optimizeButton = createStyledButton("Optimize Schedule");
+        optimizeButton.setOnAction(e -> {
+            if (clientServer != null) {
+                clientServer.sendMessage("REQUEST_EARLY_LECTURES");
+            }
+        });
+
         // Add components to layout
         mainLayout.getChildren().addAll(
                 titleLabel,
                 schedulerButton,
                 removeLecturerButton,
                 weeklyViewButton,
+                optimizeButton,
                 otherButton,
                 exitButton
         );
