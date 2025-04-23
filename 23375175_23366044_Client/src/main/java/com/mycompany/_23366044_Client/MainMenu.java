@@ -5,6 +5,7 @@
 package com.mycompany._23366044_Client;
 
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -177,8 +178,25 @@ public class MainMenu extends Application {
 
         return button;
     }
+    
+    private void handleOptimization() {
+    Task<Void> optimizeTask = new Task<>() {
+        @Override
+        protected Void call() throws Exception {
+            clientServer.sendMessage("REQUEST_EARLY_LECTURES");
+            clientServer.fetchLectures();
+            return null;
+        }
+    };
+    
+    Thread thread = new Thread(optimizeTask);
+    thread.setDaemon(true);
+    thread.start();
+}
 
     public static void main(String[] args) {
         launch(args);
     }
+    
+    
 }
