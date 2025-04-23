@@ -133,22 +133,33 @@ public class Server_23375175_23366044 {
                 
                 if (message.equals("REQUEST_EARLY_LECTURES")) {
                     
-            LectureOptimizer optimizer = new LectureOptimizer(lectures);
-            try {
-                if (optimizer.canOptimize()) {
-                    optimizer.optimizeSchedule();
-                    out.println("SUCCESS: Lectures have been optimized for earlier times");
-                    ServerGUI.updateLog("Lectures optimized successfully");
-                } else {
-                    out.println("INFO: Lectures are already optimized for earliest possible times");
-                    ServerGUI.updateLog("No optimization possible");
+                ServerGUI.updateLog("Client requested early lectures optimization");
+
+                try {
+                    LectureOptimizer optimizer = new LectureOptimizer(lectures);
+                    if (optimizer.canOptimize()) {
+                        // Get optimized schedule
+                        List<Map<String, String>> optimizedSchedule = optimizer.optimizeSchedule();
+
+                        // Update the server's lecture list with optimized schedule
+                        synchronized(lectures) {
+                            lectures.clear();
+                            lectures.addAll(optimizedSchedule);
+                        }
+
+                        out.println("SUCCESS: Lectures have been optimized for earlier times");
+                        ServerGUI.updateLog("Lectures optimized successfully");
+                    } else {
+                        out.println("INFO: Lectures are already optimized for earliest possible times");
+                        ServerGUI.updateLog("No optimization possible - lectures already at earliest times");
+                    }
+                } catch (Exception e) {
+                    ServerGUI.updateLog("Optimization failed: " + e.getMessage());
+                    e.printStackTrace(); // Print full stack trace for debugging
+                    out.println("ERROR: Failed to optimize lectures: " + e.getMessage());
                 }
-            } catch (Exception e) {
-                out.println("ERROR: Failed to optimize lectures");
-                ServerGUI.updateLog("Optimization failed: " + e.getMessage());
+                return;
             }
-            return;
-        }
 
                 switch (message) {
                     case "ENTER_SYSTEM":
