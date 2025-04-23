@@ -3,6 +3,8 @@ package com.mycompany._23366044_Client;
 
 import java.io.*;
 import java.net.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import javafx.application.Application;
 import javafx.scene.control.Alert;
 
@@ -133,11 +135,27 @@ public class ClientServer {
         }
         
         if (response.startsWith("LECTURE:")) {
-            String lectureData = response.substring("LECTURE:".length());
-            System.out.println("Received lecture: " + lectureData);
-            // Here you would process the lecture data and update the UI
-            // This depends on your application's architecture
-            return;
+        String lectureData = response.substring("LECTURE:".length());
+        System.out.println("Received lecture: " + lectureData);
+        
+        // Parse and add lecture to local manager
+        String[] parts = lectureData.split(",");
+        if (parts.length >= 6) {
+            try {
+                String module = parts[0];
+                LocalDate date = LocalDate.parse(parts[1]);
+                LocalTime time = LocalTime.parse(parts[2]);
+                String room = parts[3];
+                String lecturer = parts[4];
+                String type = parts[5];
+                
+                LecturerManager manager = LecturerManagerSingleton.getInstance();
+                manager.addLecture(module, date, time, room, type);
+            } catch (Exception e) {
+                System.err.println("Error parsing lecture data: " + e.getMessage());
+                }
+            }
+        return;
         }
         
         if (response.equals("INFO: No lectures available")) {
@@ -189,15 +207,19 @@ public class ClientServer {
     }
    
     public void fetchLectures() {
-        if (out != null) {
-            out.println("FETCH_LECTURES");
-            System.out.println("Requested lectures from server");
-            listenForResponse();
-        } else {
-            System.out.println("Not connected to server");
-            showErrorMessage("Cannot fetch lectures: Not connected to server");
-        }
+       if (out != null) {
+        // Clear existing lectures before fetching new ones
+        LecturerManager manager = LecturerManagerSingleton.getInstance();
+        manager.clearLectures();
+        
+        out.println("FETCH_LECTURES");
+        System.out.println("Requested lectures from server");
+        listenForResponse();
+    } else {
+        System.out.println("Not connected to server");
+        showErrorMessage("Cannot fetch lectures: Not connected to server");
     }
+}
    
     private static void closeConnection() {
         try {

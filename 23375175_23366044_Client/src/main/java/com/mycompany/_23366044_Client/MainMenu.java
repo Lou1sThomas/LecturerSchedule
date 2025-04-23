@@ -65,7 +65,10 @@ public class MainMenu extends Application {
         Button optimizeButton = createStyledButton("Optimize Schedule");
         optimizeButton.setOnAction(e -> {
             if (clientServer != null) {
-                clientServer.sendMessage("REQUEST_EARLY_LECTURES");
+            // First request optimization
+            clientServer.sendMessage("REQUEST_EARLY_LECTURES");
+            // Then fetch updated lectures
+            clientServer.fetchLectures();
             }
         });
 

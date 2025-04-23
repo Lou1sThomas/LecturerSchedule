@@ -187,4 +187,8 @@ public class LecturerManager {
                 .filter(l -> l.getModule().equals(module))
                 .collect(Collectors.toList());
     }
+    
+    public void clearLectures() {
+    lectures.clear();
+    }
 }
