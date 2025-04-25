@@ -206,6 +206,8 @@ public class Server_23375175_23366044 {
                 lecture.put("lecturer", parts[4]);
                 lecture.put("type", parts[5]);
                 
+                synchronized (lectures) {
+                    
                 boolean hasConflict = lectures.stream().anyMatch(l -> 
                         l.get("date").equals(parts[1]) &&
                         l.get("time").equals(parts[2]) &&
@@ -217,6 +219,8 @@ public class Server_23375175_23366044 {
                     lectures.add(lecture);
                     out.println("SUCCESS: " + parts[5] + " added successfully for " + parts[0]);
                     ServerGUI.updateLog("Lecture added: " + parts[5] + " for " + parts[0]);
+                    }
+                
                 }
             } else {
                 out.println("ERROR: Invalid lecture data format");
@@ -224,6 +228,7 @@ public class Server_23375175_23366044 {
         }
         
         private void processAddModule(String moduleData, PrintWriter out) {
+            synchronized (modules) {
             if (modules.size() >= 5) {
                 out.println("ERROR: Maximum 5 modules allowed");
             } else if (modules.contains(moduleData)) {
@@ -232,6 +237,7 @@ public class Server_23375175_23366044 {
                 modules.add(moduleData);
                 out.println("SUCCESS: Module added: " + moduleData);
                 ServerGUI.updateLog("Module added: " + moduleData);
+                }
             }
         }
         
@@ -240,10 +246,16 @@ public class Server_23375175_23366044 {
             if (parts.length >= 2) {
                 String name = parts[0];
                 String module = parts[1];
+                
+                synchronized (modules) {
+                    
                 if (!modules.contains(module)) {
                     out.println("ERROR: Module does not exist");
                     return;
+                    }
                 }
+                synchronized (lecturers){
+                    
                 boolean lecturerExists = lecturers.stream().anyMatch(l -> 
                         l.get("name").equals(name) && l.get("module").equals(module));
                 if (lecturerExists) {
@@ -255,6 +267,8 @@ public class Server_23375175_23366044 {
                     lecturers.add(lecturer);
                     out.println("SUCCESS: Lecturer added: " + name + " for " + module);
                     ServerGUI.updateLog("Lecturer added: " + name + " for " + module);
+                    }
+                
                 }
             } else {
                 out.println("ERROR: Invalid lecturer data format");
@@ -262,6 +276,8 @@ public class Server_23375175_23366044 {
         }
         
         private void sendLectures(PrintWriter out) {
+            synchronized (lectures) {
+                
             if (lectures.isEmpty()) {
                 out.println("INFO: No lectures available");
             } else {
@@ -275,6 +291,7 @@ public class Server_23375175_23366044 {
                         lecture.get("lecturer"),
                         lecture.get("type"));
                     out.println(lectureStr);
+                    }
                 }
             }
         }
