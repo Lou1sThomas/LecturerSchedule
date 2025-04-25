@@ -131,37 +131,11 @@ public class Server_23375175_23366044 {
                     return;
                 }
                 
-                if (message.equals("REQUEST_EARLY_LECTURES")) {
-                    
-                ServerGUI.updateLog("Client requested early lectures optimization");
-
-                try {
-                    LectureOptimizer optimizer = new LectureOptimizer(lectures);
-                    if (optimizer.canOptimize()) {
-                        // Get optimized schedule
-                        List<Map<String, String>> optimizedSchedule = optimizer.optimizeSchedule();
-
-                        // Update the server's lecture list with optimized schedule
-                        synchronized(lectures) {
-                            lectures.clear();
-                            lectures.addAll(optimizedSchedule);
-                        }
-
-                        out.println("SUCCESS: Lectures have been optimized for earlier times");
-                        ServerGUI.updateLog("Lectures optimized successfully");
-                    } else {
-                        out.println("INFO: Lectures are already optimized for earliest possible times");
-                        ServerGUI.updateLog("No optimization possible - lectures already at earliest times");
-                    }
-                } catch (Exception e) {
-                    ServerGUI.updateLog("Optimization failed: " + e.getMessage());
-                    e.printStackTrace(); // Print full stack trace for debugging
-                    out.println("ERROR: Failed to optimize lectures: " + e.getMessage());
-                }
-                return;
-            }
-
                 switch (message) {
+                    case "REQUEST_EARLY_LECTURES":
+                        ServerGUI.updateLog("Client requested early lectures optimization");
+                        handleOptimizationRequest(out);
+                        return;
                     case "ENTER_SYSTEM":
                         out.println("WELCOME_TO_SYSTEM");
                         ServerGUI.updateLog("Client entered the system");
@@ -193,6 +167,41 @@ public class Server_23375175_23366044 {
                 ServerGUI.updateLog("IncorrectActionException: " + e.getMessage());
                 out.println("ERROR_UNSUPPORTED_SERVICE:" + e.getMessage());
             }
+        }
+        
+        private void handleOptimizationRequest(PrintWriter out) {
+            OptimizationTask task = new OptimizationTask(lectures);
+            
+            task.setOnSucceeded(event -> {
+                List<Map<String, String>> optimizedSchedule = task.getValue();
+                synchronized(lectures) {
+                    lectures.clear();
+                    lectures.addAll(optimizedSchedule);
+                }
+                out.println("SUCCESS: Lectures have been optimized for earlier times");
+                ServerGUI.updateLog("Lectures optimized successfully");
+            });
+            
+            task.setOnFailed(event -> {
+                Throwable exception = task.getException();
+                ServerGUI.updateLog("Optimization failed: " + exception.getMessage());
+                out.println("ERROR: Failed to optimize lectures: " + exception.getMessage());
+            });
+            
+            task.messageProperty().addListener((obs, oldMsg, newMsg) -> {
+                ServerGUI.updateLog(newMsg);
+                ServerGUI.updateProgressLabel(newMsg);
+            });
+            
+            task.progressProperty().addListener((obs, oldProgress, newProgress) -> {
+                double progress = newProgress.doubleValue();
+                ServerGUI.updateProgress(progress);
+                ServerGUI.updateLog(String.format("Optimization progress: %.0f%%", progress * 100));
+            });
+            
+            Thread optimizationThread = new Thread(task);
+            optimizationThread.setDaemon(true);
+            optimizationThread.start();
         }
         
         private void processAddLecture(String lectureData, PrintWriter out) {

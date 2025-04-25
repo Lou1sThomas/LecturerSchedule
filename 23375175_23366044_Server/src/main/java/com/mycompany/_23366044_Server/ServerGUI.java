@@ -12,14 +12,19 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class ServerGUI extends Application {
     private static TextArea logArea;
     private static Label statusLabel;
     private static Label clientCountLabel;
+    private static ProgressBar progressBar;
+    private static Label progressLabel;
     private static Server_23375175_23366044 server;
 
     @Override
@@ -40,6 +45,14 @@ public class ServerGUI extends Application {
         logArea.setPrefRowCount(20);
         logArea.setWrapText(true);
 
+        // Progress bar and label
+        progressBar = new ProgressBar(0);
+        progressBar.setPrefWidth(580);
+        progressBar.setVisible(false);
+
+        progressLabel = new Label("");
+        progressLabel.setVisible(false);
+
         // Start server button
         Button startButton = new Button("Start Server");
         startButton.setOnAction(e -> {
@@ -54,6 +67,8 @@ public class ServerGUI extends Application {
             clientCountLabel,
             new Label("Server Log:"),
             logArea,
+            progressBar,
+            progressLabel,
             startButton
         );
 
@@ -75,6 +90,27 @@ public class ServerGUI extends Application {
 
     public static void updateClientCount(int count) {
         Platform.runLater(() -> clientCountLabel.setText("Connected Clients: " + count));
+    }
+
+    public static void updateProgress(double progress) {
+        Platform.runLater(() -> {
+            progressBar.setVisible(true);
+            progressBar.setProgress(progress);
+        });
+    }
+
+    public static void updateProgressLabel(String message) {
+        Platform.runLater(() -> {
+            progressLabel.setVisible(true);
+            progressLabel.setText(message);
+        });
+    }
+
+    public static void hideProgress() {
+        Platform.runLater(() -> {
+            progressBar.setVisible(false);
+            progressLabel.setVisible(false);
+        });
     }
 
     public static void main(String[] args) {
